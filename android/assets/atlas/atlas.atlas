@@ -1,0 +1,501 @@
+
+atlas.png
+size: 1024,1024
+format: RGBA8888
+filter: MipMapLinearNearest,MipMapLinearNearest
+repeat: none
+darePixelOutline
+  rotate: false
+  xy: 8, 491
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+darePixelSmall
+  rotate: false
+  xy: 8, 227
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 7
+darePixel
+  rotate: false
+  xy: 528, 747
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 10
+equipment
+  rotate: false
+  xy: 272, 227
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: 16
+pixel
+  rotate: false
+  xy: 250, 217
+  size: 2, 2
+  orig: 2, 2
+  offset: 0, 0
+  index: -1
+back1
+  rotate: false
+  xy: 32, 153
+  size: 17, 13
+  split: 8, 8, 6, 6
+  orig: 17, 13
+  offset: 0, 0
+  index: -1
+back2
+  rotate: false
+  xy: 142, 206
+  size: 17, 13
+  split: 8, 8, 6, 6
+  orig: 17, 13
+  offset: 0, 0
+  index: -1
+back3
+  rotate: false
+  xy: 186, 209
+  size: 8, 10
+  split: 2, 2, 1, 1
+  orig: 8, 10
+  offset: 0, 0
+  index: 2
+back3
+  rotate: false
+  xy: 202, 213
+  size: 8, 6
+  split: 2, 2, 1, 1
+  orig: 8, 6
+  offset: 0, 0
+  index: -1
+back4
+  rotate: false
+  xy: 636, 732
+  size: 7, 7
+  split: 2, 4, 3, 3
+  orig: 7, 7
+  offset: 0, 0
+  index: -1
+back4_grey
+  rotate: false
+  xy: 8, 55
+  size: 7, 7
+  split: 2, 4, 3, 3
+  orig: 7, 7
+  offset: 0, 0
+  index: -1
+back4transp
+  rotate: false
+  xy: 792, 863
+  size: 7, 7
+  split: 2, 4, 3, 3
+  orig: 7, 7
+  offset: 0, 0
+  index: -1
+back4transp2
+  rotate: false
+  xy: 922, 996
+  size: 7, 7
+  split: 2, 4, 3, 3
+  orig: 7, 7
+  offset: 0, 0
+  index: -1
+backInterior
+  rotate: false
+  xy: 969, 1000
+  size: 7, 3
+  split: 3, 3, 1, 1
+  orig: 7, 3
+  offset: 0, 0
+  index: -1
+bar
+  rotate: false
+  xy: 528, 602
+  size: 7, 7
+  split: 2, 4, 3, 3
+  pad: 2, 4, -1, -1
+  orig: 7, 7
+  offset: 0, 0
+  index: -1
+barInside
+  rotate: false
+  xy: 651, 732
+  size: 7, 7
+  split: 2, 4, 3, 3
+  pad: 2, 4, -1, -1
+  orig: 7, 7
+  offset: 0, 0
+  index: -1
+bigDialog
+  rotate: false
+  xy: 8, 174
+  size: 102, 45
+  orig: 102, 45
+  offset: 0, 0
+  index: -1
+black
+  rotate: false
+  xy: 698, 737
+  size: 2, 2
+  split: 0, 1, 1, 0
+  orig: 2, 2
+  offset: 0, 0
+  index: -1
+button1
+  rotate: false
+  xy: 528, 617
+  size: 7, 9
+  split: 2, 4, 3, 5
+  orig: 7, 9
+  offset: 0, 0
+  index: -1
+button1_white
+  rotate: false
+  xy: 94, 157
+  size: 7, 9
+  split: 2, 4, 3, 5
+  orig: 7, 9
+  offset: 0, 0
+  index: -1
+button2
+  rotate: false
+  xy: 8, 105
+  size: 13, 14
+  split: 2, 10, 9, 4
+  orig: 13, 14
+  offset: 0, 0
+  index: -1
+button2_shine
+  rotate: false
+  xy: 792, 913
+  size: 13, 14
+  split: 2, 10, 9, 4
+  orig: 13, 14
+  offset: 0, 0
+  index: -1
+checkBox
+  rotate: false
+  xy: 868, 989
+  size: 13, 14
+  orig: 13, 14
+  offset: 0, 0
+  index: -1
+checkBox2
+  rotate: false
+  xy: 528, 652
+  size: 13, 14
+  orig: 13, 14
+  offset: 0, 0
+  index: -1
+close
+  rotate: false
+  xy: 528, 720
+  size: 18, 19
+  orig: 18, 19
+  offset: 0, 0
+  index: -1
+closeBack
+  rotate: false
+  xy: 792, 981
+  size: 21, 22
+  orig: 21, 22
+  offset: 0, 0
+  index: -1
+closeSmall
+  rotate: false
+  xy: 57, 153
+  size: 12, 13
+  orig: 12, 13
+  offset: 0, 0
+  index: -1
+dialogue
+  rotate: false
+  xy: 8, 40
+  size: 7, 7
+  split: 2, 4, 3, 3
+  orig: 7, 7
+  offset: 0, 0
+  index: -1
+dialogueAngry
+  rotate: false
+  xy: 8, 150
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+dialogueArrow
+  rotate: false
+  xy: 218, 213
+  size: 7, 6
+  orig: 7, 6
+  offset: 0, 0
+  index: -1
+dialogueHappy
+  rotate: false
+  xy: 118, 204
+  size: 16, 15
+  orig: 16, 15
+  offset: 0, 0
+  index: -1
+dialogueLove
+  rotate: false
+  xy: 8, 127
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: 0
+dialogueLove
+  rotate: false
+  xy: 118, 181
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: 1
+dialogueQuestion
+  rotate: false
+  xy: 792, 935
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: -1
+dialogueTear
+  rotate: false
+  xy: 845, 988
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: 0
+dialogueTear
+  rotate: false
+  xy: 528, 674
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: 1
+dialogueTear
+  rotate: false
+  xy: 578, 724
+  size: 15, 15
+  orig: 15, 15
+  offset: 0, 0
+  index: 2
+dialogueThinking
+  rotate: false
+  xy: 792, 958
+  size: 16, 15
+  orig: 16, 15
+  offset: 0, 0
+  index: 0
+dialogueThinking
+  rotate: false
+  xy: 821, 988
+  size: 16, 15
+  orig: 16, 15
+  offset: 0, 0
+  index: 1
+dialogueThinking
+  rotate: false
+  xy: 528, 697
+  size: 16, 15
+  orig: 16, 15
+  offset: 0, 0
+  index: 2
+dialogueThinking
+  rotate: false
+  xy: 528, 697
+  size: 16, 15
+  orig: 16, 15
+  offset: 0, 0
+  index: 3
+dialogueUnhappy
+  rotate: false
+  xy: 554, 724
+  size: 16, 15
+  orig: 16, 15
+  offset: 0, 0
+  index: -1
+dialoguev2
+  rotate: false
+  xy: 792, 848
+  size: 7, 7
+  split: 2, 4, 3, 3
+  orig: 7, 7
+  offset: 0, 0
+  index: -1
+downArrow
+  rotate: false
+  xy: 528, 634
+  size: 9, 10
+  orig: 9, 10
+  offset: 0, 0
+  index: -1
+horBar
+  rotate: false
+  xy: 8, 70
+  size: 9, 8
+  split: 4, 4, 4, 3
+  orig: 9, 8
+  offset: 0, 0
+  index: -1
+horBarNude
+  rotate: false
+  xy: 952, 999
+  size: 9, 4
+  split: 4, 4, 2, 1
+  orig: 9, 4
+  offset: 0, 0
+  index: -1
+horBarSemi
+  rotate: false
+  xy: 792, 878
+  size: 9, 8
+  split: 4, 4, 3, 4
+  orig: 9, 8
+  offset: 0, 0
+  index: -1
+knob
+  rotate: false
+  xy: 620, 729
+  size: 8, 10
+  split: 2, 2, 2, 5
+  orig: 8, 10
+  offset: 0, 0
+  index: -1
+progressBar
+  rotate: false
+  xy: 889, 992
+  size: 9, 11
+  split: 4, 4, 5, 5
+  orig: 9, 11
+  offset: 0, 0
+  index: -1
+progressBarBack
+  rotate: false
+  xy: 167, 208
+  size: 11, 11
+  split: 5, 5, 5, 5
+  orig: 11, 11
+  offset: 0, 0
+  index: -1
+progressBarBackS
+  rotate: false
+  xy: 937, 996
+  size: 7, 7
+  split: 3, 3, 3, 3
+  orig: 7, 7
+  offset: 0, 0
+  index: -1
+progressBarBackSWhite
+  rotate: false
+  xy: 528, 587
+  size: 7, 7
+  split: 3, 3, 3, 3
+  orig: 7, 7
+  offset: 0, 0
+  index: -1
+progressBarBlueS
+  rotate: false
+  xy: 666, 732
+  size: 7, 7
+  split: 3, 3, 3, 3
+  orig: 7, 7
+  offset: 0, 0
+  index: -1
+progressBarGreen
+  rotate: false
+  xy: 601, 728
+  size: 11, 11
+  split: 5, 5, 5, 5
+  orig: 11, 11
+  offset: 0, 0
+  index: -1
+progressBarGreenS
+  rotate: false
+  xy: 8, 25
+  size: 7, 7
+  split: 3, 3, 3, 3
+  orig: 7, 7
+  offset: 0, 0
+  index: -1
+progressBarWhite
+  rotate: false
+  xy: 8, 86
+  size: 11, 11
+  split: 5, 5, 5, 5
+  orig: 11, 11
+  offset: 0, 0
+  index: -1
+progressBarWhite2
+  rotate: false
+  xy: 792, 894
+  size: 11, 11
+  split: 5, 5, 5, 5
+  orig: 11, 11
+  offset: 0, 0
+  index: -1
+separator
+  rotate: false
+  xy: 681, 737
+  size: 9, 2
+  split: 4, 4, 0, 1
+  orig: 9, 2
+  offset: 0, 0
+  index: -1
+separator2
+  rotate: false
+  xy: 233, 217
+  size: 9, 2
+  split: 4, 4, 0, 1
+  orig: 9, 2
+  offset: 0, 0
+  index: -1
+separatorVer
+  rotate: false
+  xy: 528, 570
+  size: 2, 9
+  split: 1, 0, 4, 4
+  orig: 2, 9
+  offset: 0, 0
+  index: -1
+separatorVerJoint
+  rotate: false
+  xy: 8, 8
+  size: 2, 9
+  split: 1, 0, 4, 4
+  orig: 2, 9
+  offset: 0, 0
+  index: -1
+transparent
+  rotate: false
+  xy: 792, 820
+  size: 3, 3
+  split: 1, 1, 1, 1
+  orig: 3, 3
+  offset: 0, 0
+  index: -1
+upArrow
+  rotate: false
+  xy: 77, 156
+  size: 9, 10
+  orig: 9, 10
+  offset: 0, 0
+  index: -1
+verBar
+  rotate: false
+  xy: 906, 994
+  size: 8, 9
+  split: 3, 4, 4, 4
+  orig: 8, 9
+  offset: 0, 0
+  index: -1
+verBarNude
+  rotate: false
+  xy: 792, 831
+  size: 4, 9
+  split: 1, 2, 4, 4
+  orig: 4, 9
+  offset: 0, 0
+  index: -1

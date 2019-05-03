@@ -1,0 +1,268 @@
+{
+com.badlogic.gdx.graphics.g2d.BitmapFont: {
+	darePixel_10: {
+		file: darePixel_10.fnt
+	}
+	darePixelOutline: {
+		file: darePixelOutline.fnt
+	}
+	darePixelSmall_7: {
+		file: darePixelSmall_7.fnt
+	}
+	equipment_16: {
+		file: equipment_16.fnt
+	}
+}
+com.badlogic.gdx.graphics.Color: {
+	checked: {
+		r: 0.7066667
+		g: 0.8004673
+		b: 1
+		a: 1
+	}
+	dark: {
+		r: 0.68333334
+		g: 0.68333334
+		b: 0.68333334
+		a: 1
+	}
+	gray: {
+		r: 0.91666675
+		g: 0.91666675
+		b: 0.91666675
+		a: 1
+	}
+	normalButton: {
+		r: 0.7266667
+		g: 0.8731638
+		b: 1
+		a: 1
+	}
+	over: {
+		r: 0.92333335
+		g: 0.9884063
+		b: 1
+		a: 1
+	}
+	pressed: {
+		r: 0.64
+		g: 0.8450401
+		b: 1
+		a: 1
+	}
+	RGBA_132_132_132_255: {
+		r: 0.5833333
+		g: 0.5833333
+		b: 0.5833333
+		a: 1
+	}
+	RGBA_192_192_192_255: {
+		r: 0.75
+		g: 0.75
+		b: 0.75
+		a: 1
+	}
+	RGBA_255_120_120_255: {
+		r: 1
+		g: 0.6
+		b: 0.6
+		a: 1
+	}
+	slightRed: {
+		r: 1
+		g: 0.76666665
+		b: 0.76666665
+		a: 1
+	}
+	veryRed: {
+		r: 0.91666675
+		g: 0.33305556
+		b: 0.33305556
+		a: 1
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
+	button1_pressed: {
+		name: button1
+		color: pressed
+	}
+	button1_over: {
+		name: button1
+		color: over
+	}
+	button2_over: {
+		name: button2
+		color: over
+	}
+	button2_pressed: {
+		name: button2
+		color: pressed
+	}
+	button2_gray: {
+		name: button2
+		color: gray
+	}
+	button2_checked: {
+		name: button2_shine
+		color: checked
+	}
+	button1_disabled: {
+		name: button1
+		color: dark
+	}
+	knob_over: {
+		name: knob
+		color: over
+	}
+	knob_pressed: {
+		name: knob
+		color: pressed
+	}
+	close_over: {
+		name: close
+		color: slightRed
+	}
+	close_down: {
+		name: close
+		color: veryRed
+	}
+	back4_disabled: {
+		name: back4
+		color: dark
+	}
+	back4_pressed: {
+		name: back4
+		color: pressed
+	}
+	back4_gray2: {
+		name: back4
+		color: RGBA_192_192_192_255
+	}
+	back4_gray1: {
+		name: back4
+		color: RGBA_132_132_132_255
+	}
+	button1_white_gray1: {
+		name: button1
+		color: gray
+	}
+	button1_white_gray2: {
+		name: button1_white
+		color: dark
+	}
+	button1_checked: {
+		name: button1
+		color: normalButton
+	}
+	back4_checked: {
+		name: back4
+		color: checked
+	}
+	closeSmall_3: {
+		name: closeSmall
+		color: veryRed
+	}
+	closeSmall_2: {
+		name: closeSmall
+		color: RGBA_255_120_120_255
+	}
+	checkBox_blue: {
+		name: checkBox
+		color: normalButton
+	}
+	checkBox_over: {
+		name: checkBox
+		color: over
+	}
+	checkBox_pressed: {
+		name: checkBox
+		color: pressed
+	}
+	checkBox2_over: {
+		name: checkBox2
+		color: over
+	}
+	checkBox2_pressed: {
+		name: checkBox2
+		color: pressed
+	}
+	checkBox2_blue: {
+		name: checkBox2
+		color: normalButton
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
+	default: {
+		up: button1_checked
+		down: button1_pressed
+		over: button1_over
+		disabled: button1_disabled
+	}
+	tab: {
+		up: button2_gray
+		down: button2_pressed
+		over: button2_shine
+		checked: button2_checked
+	}
+	close: {
+		up: close
+		down: close_down
+		over: close_over
+	}
+	back: {
+		up: back4_grey
+		down: back4_pressed
+		over: back4_gray2
+		checked: back4_checked
+		disabled: back4_disabled
+	}
+	white: {
+		up: button1_white_gray1
+		down: button1_white_gray2
+		over: button1
+		disabled: button1_disabled
+	}
+	checked: {
+		up: button1
+		down: button1_pressed
+		over: button1_white
+		checked: button1_checked
+		disabled: button1_disabled
+	}
+	closeS: {
+		up: closeSmall
+		down: closeSmall_3
+		over: closeSmall_2
+	}
+	checkbox: {
+		up: checkBox2_blue
+		down: checkBox2_pressed
+		over: checkBox2
+		checked: checkBox_blue
+		checkedOver: checkBox
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
+	default: {
+		hScroll: back3_2
+		hScrollKnob: knob
+		vScroll: back3
+		vScrollKnob: knob
+	}
+	back: {
+		background: back4transp
+		hScroll: back3_2
+		hScrollKnob: knob
+		vScroll: back3
+		vScrollKnob: knob
+	}
+}
+com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
+	default-horizontal: {
+		knobOver: knob_over
+		knobDown: knob_pressed
+		background: back3
+		knob: knob
+	}
+}
+}

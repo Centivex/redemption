@@ -1,0 +1,22 @@
+
+
+# 0s elapsed #
+ version 0.1.1
+
+# 3s elapsed #
+ ____
+Started loading fonts
+Loading font: darepixel.ttf; id: darePixel...
+     size: 10
+--> font was already generated; font loaded
+_____
+Loading font: darepixelsmall.ttf; id: darePixelSmall...
+     size: 7
+--> font was already generated; font loaded
+_____
+Loading font: EquipmentExtended.ttf; id: equipment...
+     size: 16
+--> font was already generated; font loaded
+_____
+Finished loading fonts; elapsed: 0.0s
+____
