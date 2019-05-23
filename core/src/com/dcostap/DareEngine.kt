@@ -30,7 +30,7 @@ class Engine : ApplicationListener {
         var isRelease = false
 
         /** Pixels per game unit */
-        var PPM: Int = 36
+        var PPM: Int = 16
 
         /** set to false to make it easier to selectively choose which entities are included in map's colliding trees */
         var ENTITIES_PROVIDE_COLL_INFO_DEFAULT = false
@@ -46,14 +46,14 @@ class Engine : ApplicationListener {
 
         var DEBUG_PRINT = true
 
-        var DEBUG_MAP_CELLS = false
-        var DEBUG_ENTITIES_BB = false
+        var DEBUG_MAP_CELLS = true
+        var DEBUG_ENTITIES_BB = true
 
         var DEBUG_COLLISION_TREE_CELLS = false
         var DEBUG_COLLISION_TREE_UPDATES = false
         var PATHFINDING_CELL_FLASH = false
 
-        var DEBUG_LINE_THICKNESS = 0.014f
+        var DEBUG_LINE_THICKNESS = 0.1f
         var DEBUG_TRANSPARENCY = 0.5f
 
         init {

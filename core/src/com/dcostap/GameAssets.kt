@@ -32,6 +32,8 @@ class GameAssets : Assets() {
     val fontEquipment get() = skin.getFont("equipment_16")
     val fontDareOutline get() = skin.getFont("darePixelOutline")
 
+    val zona1mapa = JsonMapLoader("zona1", "maps", "maps", "maps/tilesets")
+
     override fun setupFontsToBeLoaded() {
         SmartFontGenerator.pageSize = 256
         val parameter = FreeTypeFontGenerator.FreeTypeFontParameter()

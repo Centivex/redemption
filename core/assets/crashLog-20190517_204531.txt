@@ -1,0 +1,34 @@
+
+
+# 0s elapsed #
+ _____
+Checking for image changes...
+Finished; time elapsed: 0.01 s
+_____
+
+_____
+Packing images...
+
+
+Finished; time elapsed: 0.951 s
+_____
+
+
+# 1s elapsed #
+ version 1.0.0-7-g62a7cf7
+____
+Started loading fonts
+Loading font: darepixel.ttf; id: darePixel...
+     size: 10
+--> font was already generated; font loaded
+_____
+Loading font: darepixelsmall.ttf; id: darePixelSmall...
+     size: 7
+--> font was already generated; font loaded
+_____
+Loading font: EquipmentExtended.ttf; id: equipment...
+     size: 16
+--> font was already generated; font loaded
+_____
+Finished loading fonts; elapsed: 0.0s
+____

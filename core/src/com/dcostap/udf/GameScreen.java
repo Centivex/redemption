@@ -1,9 +1,13 @@
 package com.dcostap.udf;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dcostap.Engine;
+import com.dcostap.engine.map.EntityTiledMap;
 import com.dcostap.engine.utils.GameDrawer;
 import com.dcostap.engine.utils.Utils;
 import com.dcostap.engine.utils.screens.BaseScreenWithUI;
@@ -13,13 +17,32 @@ import org.jetbrains.annotations.NotNull;
  * Created by Darius on 03-May-19.
  */
 public class GameScreen extends BaseScreenWithUI {
+
+    private EntityTiledMap map = new EntityTiledMap(this, getWorldViewport());
+    Jugador jugador =new Jugador(this);
+
     public GameScreen(Engine engine) {
         super(engine);
+        getAssets().getZona1mapa().loadMap(map, new GameMapLoader(), null, null, 10);
+        map.addEntity(jugador);
+
     }
+
+
+    @Override
+    public void update(float delta) {
+        super.update(delta);
+        map.update(delta);
+        getCamera().position.set(jugador.getPosition().x,jugador.getPosition().y,0);
+
+
+    }
+
 
     @Override
     public Viewport createViewport() {
-        return new ExtendViewport(Engine.Info.getViewportWidth(), Engine.Info.getViewportHeight());
+        return new ExtendViewport(Engine.Info.getViewportWidth() / (float) Engine.Info.getPPM(),
+                Engine.Info.getViewportHeight() / (float) Engine.Info.getPPM(), getCamera());
     }
 
     @Override
@@ -40,7 +63,7 @@ public class GameScreen extends BaseScreenWithUI {
         getEngine().getBatch().begin();
 
         // draw here
-
+        map.draw(gameDrawer, delta);
         getEngine().getBatch().end();
 
         getStage().act(delta);

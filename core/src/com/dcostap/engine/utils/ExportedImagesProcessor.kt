@@ -20,6 +20,7 @@ class ExportedImagesProcessor {
         var exportAtlasFolder = "atlas"
         var imagesOrigin = "../../workingAssets/atlas"
         var hashFileName = "textureHash.txt"
+        val ignoreBlankRegions = false
 
         /** Will use texturePacker to pack all images, only if files have changed or atlas output files are not created
          * Loads settings from pack.json files in folders
@@ -31,7 +32,7 @@ class ExportedImagesProcessor {
          *  . The image will be sliced up to image regions following a grid of values w (width) and h (height)
          *  . Resulting regions will be saved as new png files
          *  . Original image will be deleted when finished
-         *  . By default fully transparent regions will be ignored. If you want to include transparent regions, use
+         *  . By default fully transparent regions might be ignored [ignoreBlankRegions]. If you want to include transparent regions, use
          *  optional _n# parameter to declare the number of regions that should be created. Created images will include fully
          *  transparent regions but only n number of regions will be sliced
          *  . Regions are counted starting from top-left going right then 1 new row bottom until finished.
@@ -91,7 +92,7 @@ class ExportedImagesProcessor {
                                     }
                                 }
 
-                                if (!isFullyTransparent || optionalNumberOfFrames != null) {
+                                if (!ignoreBlankRegions || (!isFullyTransparent || optionalNumberOfFrames != null)) {
                                     val finalName = newName + "_$i.png"
                                     printDebug("  created new image #$i: $finalName")
                                     val parentPath = file.path.replace(file.name, "")
@@ -99,7 +100,7 @@ class ExportedImagesProcessor {
                                 } else {
                                     printDebug("  (!) tile #$i is fully transparent, won't create new image")
                                 }
-                                
+
                                 newImage.dispose()
 
                                 i++
@@ -125,6 +126,23 @@ class ExportedImagesProcessor {
                         }
                     }
                 }
+
+//                fun mergeImagesHere(folder: File) {
+//                    val files = folder.listFiles()
+//
+//                    Arrays.sort(files) {o1, o2 ->
+//                        o1.lastModified().compareTo(o2.lastModified())
+//                    }
+//
+//                    val finalFiles = files.filter { it.name.endsWith(".png") }
+//
+//                    val newImage = Pixmap(width, height, Pixmap.Format.RGBA8888)
+//
+//                }
+//
+//                for (file in File(imagesOrigin).walk()) {
+//                    if (file.isDirectory) mergeImagesHere(file)
+//                }
 
                 printDebug()
 

@@ -1,6 +1,8 @@
 package com.dcostap.udf;
 
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.dcostap.Engine;
 import com.dcostap.engine.map.EntityTiledMap;
 import com.dcostap.engine.map.MapCell;
 import com.dcostap.engine.map.entities.Entity;
@@ -25,7 +27,9 @@ public class GameMapLoader implements EntityLoaderFromString, TileLoaderFromStri
     @Override
     public Entity loadEntityFromObjectName(@NotNull String objectName, @NotNull Vector2 position, int widthPixels,
                                            int heightPixels, @NotNull EntityTiledMap map, @NotNull CustomProperties objectProps) {
-        return null;
+        return new Entity(new Vector2(position), new Rectangle(0f, 0f, widthPixels / Engine.Info.getPPM(),
+                heightPixels / Engine.Info.getPPM()), true);
+
     }
 
     // TILES
