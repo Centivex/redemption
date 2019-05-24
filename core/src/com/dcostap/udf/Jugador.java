@@ -3,6 +3,8 @@ package com.dcostap.udf;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.math.Rectangle;
+import com.dcostap.Engine;
 import com.dcostap.engine.map.entities.CollidingEntity;
 import com.dcostap.engine.utils.Animation;
 import com.dcostap.engine.utils.GameDrawer;
@@ -36,6 +38,10 @@ public class Jugador extends CollidingEntity {
         animCamDe.pause();
         animCamIz.pause();
 
+
+        this.getActualBoundingBox().modify(new Rectangle());
+
+        getActualBoundingBox().modify(new Rectangle(0f, 0f, 30f / Engine.Info.getPPM(), 30f / Engine.Info.getPPM()));
     }
 
     @Override

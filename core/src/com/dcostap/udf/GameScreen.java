@@ -23,9 +23,9 @@ public class GameScreen extends BaseScreenWithUI {
 
     public GameScreen(Engine engine) {
         super(engine);
-        getAssets().getZona1mapa().loadMap(map, new GameMapLoader(), null, null, 10);
+        getAssets().getZona1mapa().loadMap(map, new GameMapLoader(this), null, null, 10);
         map.addEntity(jugador);
-
+        getCamera().position.set(5.6875f,4f,0);
     }
 
 
@@ -33,7 +33,8 @@ public class GameScreen extends BaseScreenWithUI {
     public void update(float delta) {
         super.update(delta);
         map.update(delta);
-        getCamera().position.set(jugador.getPosition().x,jugador.getPosition().y,0);
+        getCamera().position.set(jugador.getPosition().x+5.6875f,jugador.getPosition().y+4f,0);
+       // System.out.println(jugador.getPosition().x+" holaaaaa "+jugador.getPosition().y);
 
 
     }

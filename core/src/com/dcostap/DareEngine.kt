@@ -33,7 +33,7 @@ class Engine : ApplicationListener {
         var PPM: Int = 16
 
         /** set to false to make it easier to selectively choose which entities are included in map's colliding trees */
-        var ENTITIES_PROVIDE_COLL_INFO_DEFAULT = false
+        var ENTITIES_PROVIDE_COLL_INFO_DEFAULT = true
 
         var DEBUG_UI = true
         var DEBUG_UI_ENTITY_INFO_ABOVE = false

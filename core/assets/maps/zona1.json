@@ -186,6 +186,84 @@
                  "width":18.6666666666666,
                  "x":174.333333333333,
                  "y":18
+                }, 
+                {
+                 "height":10,
+                 "id":12,
+                 "name":"solid",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":135.666666666667,
+                 "x":28,
+                 "y":60
+                }, 
+                {
+                 "height":10,
+                 "id":13,
+                 "name":"solid",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":13.6666666666666,
+                 "x":162,
+                 "y":42.6666666666667
+                }, 
+                {
+                 "height":10,
+                 "id":14,
+                 "name":"solid",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":13.6666666666666,
+                 "x":15.6666666666667,
+                 "y":45
+                }, 
+                {
+                 "height":10,
+                 "id":15,
+                 "name":"solid",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":13.6666666666666,
+                 "x":26.6666666666667,
+                 "y":52.6666666666667
+                }, 
+                {
+                 "height":10,
+                 "id":16,
+                 "name":"solid",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":13.6666666666666,
+                 "x":154.666666666667,
+                 "y":53
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":7,
+         "name":"player",
+         "objects":[
+                {
+                 "height":0,
+                 "id":17,
+                 "name":"player",
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":91.3333333333333,
+                 "y":128.333333333333
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -193,8 +271,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":7,
- "nextobjectid":12,
+ "nextlayerid":8,
+ "nextobjectid":18,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.2.4",
@@ -202,11 +280,11 @@
  "tilesets":[
         {
          "firstgid":1,
-         "source":"tileset\/mundo.json"
+         "source":"tilesets\/mundo.json"
         }, 
         {
          "firstgid":1441,
-         "source":"tileset\/cueva.json"
+         "source":"tilesets\/cueva.json"
         }],
  "tilewidth":16,
  "type":"map",
