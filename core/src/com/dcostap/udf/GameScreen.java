@@ -19,12 +19,13 @@ import org.jetbrains.annotations.NotNull;
 public class GameScreen extends BaseScreenWithUI {
 
     private EntityTiledMap map = new EntityTiledMap(this, getWorldViewport());
-    Jugador jugador =new Jugador(this);
+    Jugador jugador;
+    GameMapLoader mapLoader = new GameMapLoader(this);
 
     public GameScreen(Engine engine) {
         super(engine);
-        getAssets().getZona1mapa().loadMap(map, new GameMapLoader(this), null, null, 10);
-        map.addEntity(jugador);
+        getAssets().getZona1mapa().loadMap(map, mapLoader, null, null, 10);
+        jugador = mapLoader.jugador;
         getCamera().position.set(5.6875f,4f,0);
     }
 
@@ -34,9 +35,6 @@ public class GameScreen extends BaseScreenWithUI {
         super.update(delta);
         map.update(delta);
         getCamera().position.set(jugador.getPosition().x+5.6875f,jugador.getPosition().y+4f,0);
-       // System.out.println(jugador.getPosition().x+" holaaaaa "+jugador.getPosition().y);
-
-
     }
 
 

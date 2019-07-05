@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 public class GameMapLoader implements EntityLoaderFromString, TileLoaderFromString {
 
     public GameScreen gs;
+    public Jugador jugador;
 
     public GameMapLoader(GameScreen gs){
         this.gs=gs;
@@ -40,7 +41,7 @@ public class GameMapLoader implements EntityLoaderFromString, TileLoaderFromStri
                 heightPixels / (float)Engine.Info.getPPM()), true);
         }
         else if (objectName.equals("player")){
-            Jugador jugador= new Jugador(gs);
+            jugador = new Jugador(gs);
             jugador.getPosition().set(position);
             return jugador;
         }
