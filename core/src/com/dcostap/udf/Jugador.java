@@ -40,8 +40,7 @@ public class Jugador extends CollidingEntity {
 
 
         this.getActualBoundingBox().modify(new Rectangle());
-
-        getActualBoundingBox().modify(new Rectangle(0f, 0f, 30f / Engine.Info.getPPM(), 30f / Engine.Info.getPPM()));
+        getActualBoundingBox().modify(new Rectangle(-0.25f, -0.25f, 7f / Engine.Info.getPPM(), 7f / Engine.Info.getPPM()));
     }
 
     @Override
@@ -87,25 +86,31 @@ public class Jugador extends CollidingEntity {
 
     @Override
     public void draw(@NotNull GameDrawer gameDrawer, float delta) {
-        super.draw(gameDrawer, delta);
+
+        //por si algun dia quieres obtener la altura del sprite
+        //int er= gs.getAssets().getTexture("caminar_abajo").getRegionHeight();
+
         if (i==4){
             animCamAr.update(delta);
-            gameDrawer.draw(animCamAr.getFrame(),getX(),getY(),0.5f,0.5f);
+            gameDrawer.draw(animCamAr.getFrame(), getX(), getY()-1f, 1f, 1f,0f, 0f, 0f, false, false, 0, 0, true, false);
+
         }
         else  if (i==3){
             animCamAb.update(delta);
-            gameDrawer.draw(animCamAb.getFrame(),getX(),getY(),0.5f,0.5f);
+            gameDrawer.draw(animCamAb.getFrame(), getX(), getY()-1f, 1f, 1f,0f, 0f, 0f, false, false, 0, 0, true, false);
         }
         else  if (i==2){
             animCamDe.update(delta);
-            gameDrawer.draw(animCamDe.getFrame(),getX(),getY(),0.5f,0.5f);
+            gameDrawer.draw(animCamDe.getFrame(), getX(), getY()-1f, 1f, 1f,0f, 0f, 0f, false, false, 0, 0, true, false);
         }
         else  if (i==1){
             animCamIz.update(delta);
-            gameDrawer.draw(animCamIz.getFrame(),getX(),getY(),0.5f,0.5f);
+            gameDrawer.draw(animCamIz.getFrame(), getX(), getY()-1f, 1f, 1f,0f, 0f, 0f, false, false, 0, 0, true, false);
         }
         else if(i==0){
-            gameDrawer.draw(animCamAb.getFrame(),getX(),getY(),0.5f,0.5f);
+            gameDrawer.draw(animCamAb.getFrame(), getX(), getY()-1f, 1f, 1f,0f, 0f, 0f, false, false, 0, 0, true, false);
         }
+        super.draw(gameDrawer, delta);
     }
+
 }

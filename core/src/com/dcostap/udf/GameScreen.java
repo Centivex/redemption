@@ -34,7 +34,7 @@ public class GameScreen extends BaseScreenWithUI {
     public void update(float delta) {
         super.update(delta);
         map.update(delta);
-        getCamera().position.set(jugador.getPosition().x+5.6875f,jugador.getPosition().y+4f,0);
+        getCamera().position.set(jugador.getPosition().x,jugador.getPosition().y,0);
     }
 
 
