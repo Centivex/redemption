@@ -3,6 +3,7 @@ package com.dcostap.udf;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.dcostap.Engine;
 import com.dcostap.engine.map.entities.CollidingEntity;
@@ -15,8 +16,9 @@ public class Jugador extends CollidingEntity {
     public float velocidad = 5;
     public GameScreen gs;
     public float timeAnim=0.1f;
-    //varible para pasar la animacion correcta, en funcion del movimiento
+    //varible para pasar la animacion correcta, en funcion del movimiento. la i es basicamente la dirección
     public float i=0;
+    public boolean atacando=false;
 
     private Animation<TextureAtlas.AtlasRegion> animCamAb, animCamAr, animCamDe, animCamIz, animAttAb, animAttAr, animAttDe, animAttIz;
 
@@ -38,19 +40,27 @@ public class Jugador extends CollidingEntity {
         animCamDe.pause();
         animCamIz.pause();
 
+        animAttAb.pause();
+        animAttAr.pause();
+        animAttDe.pause();
+        animAttIz.pause();
+
 
         this.getActualBoundingBox().modify(new Rectangle());
-        getActualBoundingBox().modify(new Rectangle(-0.25f, -0.25f, 7f / Engine.Info.getPPM(), 7f / Engine.Info.getPPM()));
+        getActualBoundingBox().modify(new Rectangle(-0.25f, -0.20f, 7f / Engine.Info.getPPM(), 7f / Engine.Info.getPPM()));
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
         getSpeed().set(0,0);
+
+        //las animaciones de movimiento
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             getSpeed().x = -velocidad;
             animCamIz.resume();
             i=1;
+
         }else {
             animCamIz.pause();
             animCamIz.reset();
@@ -82,6 +92,56 @@ public class Jugador extends CollidingEntity {
             animCamAr.pause();
             animCamAr.reset();
         }
+
+        //las animaciones de atacar
+        if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
+            getSpeed().x = 0f;
+            atacando=true;
+
+            if (i==1){
+                animCamIz.pause();
+                animCamIz.reset();
+                animAttIz.resume();
+            }
+            else {
+                animAttIz.pause();
+                animAttIz.reset();
+            }
+
+            if (i==2){
+                animCamDe.pause();
+                animCamDe.reset();
+                animAttDe.resume();
+            }
+            else {
+                animAttDe.pause();
+                animAttDe.reset();
+            }
+
+            if (i==3 || i ==0){
+                animCamAb.pause();
+                animCamAb.reset();
+                animAttAb.resume();
+            }
+            else {
+                animAttAb.pause();
+                animAttAb.reset();
+            }
+
+            if (i==4){
+                animCamAr.pause();
+                animCamAr.reset();
+                animAttAr.resume();
+            }
+            else {
+                animAttAr.pause();
+                animAttAr.reset();
+            }
+
+        }
+        else {
+            atacando=false;
+        }
     }
 
     @Override
@@ -90,26 +150,57 @@ public class Jugador extends CollidingEntity {
         //por si algun dia quieres obtener la altura del sprite
         //int er= gs.getAssets().getTexture("caminar_abajo").getRegionHeight();
 
+        TextureRegion frame =null;
+
         if (i==4){
             animCamAr.update(delta);
-            gameDrawer.draw(animCamAr.getFrame(), getX(), getY()-1f, 1f, 1f,0f, 0f, 0f, false, false, 0, 0, true, false);
+            frame=animCamAr.getFrame();
+
+            if (atacando==true){
+                animAttAr.update(delta);
+                frame=animAttAr.getFrame();
+            }
 
         }
         else  if (i==3){
             animCamAb.update(delta);
-            gameDrawer.draw(animCamAb.getFrame(), getX(), getY()-1f, 1f, 1f,0f, 0f, 0f, false, false, 0, 0, true, false);
+            frame=animCamAb.getFrame();
+
+            if (atacando==true){
+                animAttAb.update(delta);
+                frame=animAttAb.getFrame();
+            }
         }
         else  if (i==2){
             animCamDe.update(delta);
-            gameDrawer.draw(animCamDe.getFrame(), getX(), getY()-1f, 1f, 1f,0f, 0f, 0f, false, false, 0, 0, true, false);
+            frame=animCamDe.getFrame();
+
+            if (atacando==true){
+                animAttDe.update(delta);
+                frame=animAttDe.getFrame();
+            }
         }
         else  if (i==1){
             animCamIz.update(delta);
-            gameDrawer.draw(animCamIz.getFrame(), getX(), getY()-1f, 1f, 1f,0f, 0f, 0f, false, false, 0, 0, true, false);
+            frame=animCamIz.getFrame();
+
+            if (atacando==true){
+                animAttIz.update(delta);
+                frame=animAttIz.getFrame();
+            }
         }
         else if(i==0){
-            gameDrawer.draw(animCamAb.getFrame(), getX(), getY()-1f, 1f, 1f,0f, 0f, 0f, false, false, 0, 0, true, false);
+            frame=animCamAb.getFrame();
+
+            if (atacando==true){
+                animAttAb.update(delta);
+                frame=animAttAb.getFrame();
+            }
         }
+
+        gameDrawer.draw(frame, getX(), getY()-1f, 1f, 1f,0f, 0f, 0f, false, false, 0, 0, true, false);
+
+
         super.draw(gameDrawer, delta);
     }
 
