@@ -30,10 +30,10 @@ public class Jugador extends CollidingEntity {
         animCamDe =new Animation<>(gs.getAssets().getTextures("caminar_derecha"),timeAnim );
         animCamIz =new Animation<>(gs.getAssets().getTextures("caminar_izquierda"),timeAnim );
 
-        animAttAb =new Animation<>(gs.getAssets().getTextures("atacar_abajo"),timeAnim );
-        animAttAr =new Animation<>(gs.getAssets().getTextures("atacar_arriba"),timeAnim );
-        animAttDe =new Animation<>(gs.getAssets().getTextures("atacar_derecha"),timeAnim );
-        animAttIz =new Animation<>(gs.getAssets().getTextures("atacar_izquierda"),timeAnim );
+        animAttAb =new Animation<>(gs.getAssets().getTextures("atacar_abajo"),timeAnim);
+        animAttAr =new Animation<>(gs.getAssets().getTextures("atacar_arriba"),timeAnim);
+        animAttDe =new Animation<>(gs.getAssets().getTextures("atacar_derecha"),timeAnim);
+        animAttIz =new Animation<>(gs.getAssets().getTextures("atacar_izquierda"),timeAnim);
 
         animCamAb.pause();
         animCamAr.pause();
@@ -137,10 +137,6 @@ public class Jugador extends CollidingEntity {
                 animAttAr.pause();
                 animAttAr.reset();
             }
-
-        }
-        else {
-            atacando=false;
         }
     }
 
@@ -159,6 +155,8 @@ public class Jugador extends CollidingEntity {
             if (atacando==true){
                 animAttAr.update(delta);
                 frame=animAttAr.getFrame();
+
+                if (animAttAr.getFinishedNormalAnimation()) atacando = false;
             }
 
         }
@@ -169,6 +167,8 @@ public class Jugador extends CollidingEntity {
             if (atacando==true){
                 animAttAb.update(delta);
                 frame=animAttAb.getFrame();
+
+                if (animAttAb.getFinishedNormalAnimation()) atacando = false;
             }
         }
         else  if (i==2){
@@ -178,6 +178,8 @@ public class Jugador extends CollidingEntity {
             if (atacando==true){
                 animAttDe.update(delta);
                 frame=animAttDe.getFrame();
+
+                if (animAttDe.getFinishedNormalAnimation()) atacando = false;
             }
         }
         else  if (i==1){
@@ -187,6 +189,10 @@ public class Jugador extends CollidingEntity {
             if (atacando==true){
                 animAttIz.update(delta);
                 frame=animAttIz.getFrame();
+
+                if (animAttIz.getFinishedNormalAnimation()) {
+                    atacando = false;
+                }
             }
         }
         else if(i==0){
@@ -195,6 +201,8 @@ public class Jugador extends CollidingEntity {
             if (atacando==true){
                 animAttAb.update(delta);
                 frame=animAttAb.getFrame();
+
+                if (animAttAb.getFinishedNormalAnimation()) atacando = false;
             }
         }
 
