@@ -52,6 +52,7 @@ public class Jugador extends CollidingEntity {
 
     @Override
     public void update(float delta) {
+
         super.update(delta);
         getSpeed().set(0,0);
 
@@ -95,8 +96,9 @@ public class Jugador extends CollidingEntity {
 
         //las animaciones de atacar
         if(Gdx.input.isKeyJustPressed(Input.Keys.SPACE)){
-            getSpeed().x = 0f;
+
             atacando=true;
+
 
             if (i==1){
                 animCamIz.pause();
@@ -156,6 +158,8 @@ public class Jugador extends CollidingEntity {
                 animAttAr.update(delta);
                 frame=animAttAr.getFrame();
 
+                getSpeed().set(0,0);
+
                 if (animAttAr.getFinishedNormalAnimation()) atacando = false;
             }
 
@@ -168,6 +172,8 @@ public class Jugador extends CollidingEntity {
                 animAttAb.update(delta);
                 frame=animAttAb.getFrame();
 
+                getSpeed().set(0,0);
+
                 if (animAttAb.getFinishedNormalAnimation()) atacando = false;
             }
         }
@@ -178,6 +184,8 @@ public class Jugador extends CollidingEntity {
             if (atacando==true){
                 animAttDe.update(delta);
                 frame=animAttDe.getFrame();
+
+                getSpeed().set(0,0);
 
                 if (animAttDe.getFinishedNormalAnimation()) atacando = false;
             }
@@ -190,6 +198,8 @@ public class Jugador extends CollidingEntity {
                 animAttIz.update(delta);
                 frame=animAttIz.getFrame();
 
+                getSpeed().set(0,0);
+
                 if (animAttIz.getFinishedNormalAnimation()) {
                     atacando = false;
                 }
@@ -201,6 +211,8 @@ public class Jugador extends CollidingEntity {
             if (atacando==true){
                 animAttAb.update(delta);
                 frame=animAttAb.getFrame();
+
+                getSpeed().set(0,0);
 
                 if (animAttAb.getFinishedNormalAnimation()) atacando = false;
             }
