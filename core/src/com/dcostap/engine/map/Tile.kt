@@ -20,7 +20,7 @@ open class Tile(val map: EntityTiledMap, var depth: Int, var tileSprName: String
         }
 
     override fun draw(gameDrawer: GameDrawer, delta: Float) {
-        gameDrawer.draw(sprite, cell.x.toFloat(), cell.y.toFloat())
+        gameDrawer.draw(sprite, cell.x.toFloat(), cell.y.toFloat(), rotation = rotation.toFloat())
     }
 
     override fun getDrawingRepresentativeY(): Float {

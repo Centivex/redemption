@@ -1,7 +1,6 @@
 package com.dcostap.engine.utils.actions
 
 import com.badlogic.gdx.math.Interpolation
-import ktx.collections.*
 
 /**
  * Created by Darius on 04/05/2018.
@@ -13,7 +12,7 @@ class ValueAction(val startValue: Float, val endValue: Float, duration: Float,
                   interpolation: Interpolation, tag: String = "", val valueUpdated: (Float) -> Unit = {})
     : Action(duration, interpolation, tag) {
 
-    override fun updateProgress(percent: Float) {
+    override fun updateProgress(percent: Float, delta: Float) {
         val value = ((endValue - startValue) * percent) + startValue
 
         valueUpdated(value)
@@ -27,7 +26,7 @@ class ValueAction(val startValue: Float, val endValue: Float, duration: Float,
 class SequenceAction(vararg actions: Action) : Action(0f) {
     val sequenceOfActions = actions
 
-    override fun updateProgress(percent: Float) {
+    override fun updateProgress(percent: Float, delta: Float) {
 
     }
 
@@ -54,7 +53,7 @@ class SequenceAction(vararg actions: Action) : Action(0f) {
 class ParallelAction(vararg actions: Action) : Action(0f) {
     val sequenceOfActions = actions
 
-    override fun updateProgress(percent: Float) {
+    override fun updateProgress(percent: Float, delta: Float) {
 
     }
 
@@ -82,7 +81,7 @@ class ParallelAction(vararg actions: Action) : Action(0f) {
 }
 
 class RunAction(delay: Float = 0f, val function: () -> Unit) : Action(delay) {
-    override fun updateProgress(percent: Float) {
+    override fun updateProgress(percent: Float, delta: Float) {
 
     }
 
@@ -91,8 +90,32 @@ class RunAction(delay: Float = 0f, val function: () -> Unit) : Action(delay) {
     }
 }
 
+class RunUntil(val delay: Float = 0f, val function: (Float) -> Boolean) : Action(0f) {
+    override fun updateProgress(percent: Float, delta: Float) {
+
+    }
+
+    private var elapsed = 0f
+    private var finish = false
+    override fun update(delta: Float) {
+        if (hasFinished) return
+
+        if (elapsed >= delay) {
+            finish = function(delta)
+        } else
+            elapsed += delta
+    }
+
+    override val hasFinished: Boolean
+        get() = finish
+
+    override fun finalUpdate() {
+
+    }
+}
+
 class UpdateAction(time: Float = 0f, val function: () -> Unit) : Action(time) {
-    override fun updateProgress(percent: Float) {
+    override fun updateProgress(percent: Float, delta: Float) {
         function()
     }
 
@@ -102,7 +125,7 @@ class UpdateAction(time: Float = 0f, val function: () -> Unit) : Action(time) {
 }
 
 class WaitAction(delay: Float = 0f) : Action(delay) {
-    override fun updateProgress(percent: Float) {
+    override fun updateProgress(percent: Float, delta: Float) {
 
     }
 

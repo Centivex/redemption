@@ -1,4 +1,4 @@
-package com.dcostap.udf;
+package com.dcostap.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class GameScreen extends BaseScreenWithUI {
 
-    private EntityTiledMap map = new EntityTiledMap(this, getWorldViewport());
+    private EntityTiledMap map = new EntityTiledMap(this);
     Jugador jugador;
     GameMapLoader mapLoader = new GameMapLoader(this);
 
@@ -34,19 +34,31 @@ public class GameScreen extends BaseScreenWithUI {
     public void update(float delta) {
         super.update(delta);
         map.update(delta);
-        getCamera().position.set(jugador.getPosition().x,jugador.getPosition().y,0);
-    }
+//        getCamera().position.set(jugador.getPosition().x,jugador.getPosition().y,0);
 
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            getCamera().position.x -= 0.1f;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            getCamera().position.x += 0.1f;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            getCamera().position.y -= 0.1f;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            getCamera().position.y += 0.1f;
+        }
+    }
 
     @Override
     public Viewport createViewport() {
-        return new ExtendViewport(Engine.Info.getViewportWidth() / (float) Engine.Info.getPPM(),
-                Engine.Info.getViewportHeight() / (float) Engine.Info.getPPM(), getCamera());
+        return new ExtendViewport(Engine.Info.getAPP_WIDTH() / (float) Engine.Info.getPPM(),
+                Engine.Info.getAPP_HEIGHT() / (float) Engine.Info.getPPM(), getCamera());
     }
 
     @Override
     public Stage createStage() {
-        return new Stage(new ExtendViewport(Engine.Info.getViewportWidth(), Engine.Info.getViewportHeight()));
+        return new Stage(new ExtendViewport(Engine.Info.getAPP_WIDTH(), Engine.Info.getAPP_HEIGHT()));
     }
 
     @Override

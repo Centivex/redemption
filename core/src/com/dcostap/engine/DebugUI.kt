@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.ui.TextField
 import com.badlogic.gdx.scenes.scene2d.ui.Window
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable
+import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.Pool
 import com.badlogic.gdx.utils.Pools
 import com.badlogic.gdx.utils.viewport.ScreenViewport
@@ -21,10 +22,11 @@ import com.dcostap.engine.utils.ui.ResizableActorTable
 import com.dcostap.engine.utils.screens.BaseScreen
 import com.dcostap.engine.utils.ui.ExtLabel
 import com.dcostap.engine.utils.ui.ExtTable
+import com.dcostap.printDebug
 import com.kotcrab.vis.ui.VisUI
 import com.kotcrab.vis.ui.widget.VisTextButton
 import ktx.actors.onChange
-import ktx.collections.GdxArray
+import ktx.collections.*
 import java.util.*
 
 /**
@@ -45,28 +47,53 @@ class DebugUI(val engine: Engine) : ScreenAdapter() {
 
     val debugFont get() = engine.assets.getDebugFont()
 
-    private var debugCommands: ExtTable? = null
-    private var debugField: TextField? = null
+    private val debugCommands = ExtTable()
+    private val historyLabels = GdxArray<ObjectMap.Entry<ExtLabel, String>>()
+    private val debugField = TextField("", VisUI.getSkin())
+    var consoleClosed = true
 
-    fun openCloseDebugCommandsWindow() {
-        // debug command window, press enter to activate
-        debugCommands.ifNotNull {
-            it.clear()
-            it.remove()
-            engine.runDebugCommand(debugField!!.text)
-            debugField = null
-            debugCommands = null
-        }.ifNull {
-            stage.addActor(ExtTable().also {
-                debugCommands = it
-                it.setFillParent(true)
-                it.center()
-                debugField = TextField("", VisUI.getSkin())
-                it.add(debugField)
-                stage.keyboardFocus = debugField
-                debugField?.text = ""
+    init {
+        debugCommands.also {
+            it.setFillParent(true)
+            it.center()
+            it.add(debugField)
+            debugField.text = ""
+        }
+
+        for (i in 0..5) {
+            historyLabels.add(ObjectMap.Entry<ExtLabel, String>().also {
+                it.key = ExtLabel("", VisUI.getSkin().getFont("default-font"))
+                it.value = ""
             })
         }
+    }
+    
+    fun openCloseDebugCommandsWindow() {
+        if (!consoleClosed) {
+            debugCommands.remove()
+            var str = debugField.text
+            var times = 1
+            val regex = Regex("([0-9]*)x(.*)")
+            regex.find(str)?.groupValues?.let {
+                try {
+                    times = it[1].toInt()
+                    str = it[2]
+                } catch (e: Exception) {
+
+                }
+            }
+
+            printDebug("> command '$str'" + if (times == 1) "" else " x$times")
+            repeat(times) {
+                engine.runDebugCommand(str)
+            }
+        } else {
+            stage.keyboardFocus = debugField
+            stage.addActor(debugCommands)
+            debugField.text = ""
+        }
+
+        consoleClosed = !consoleClosed
     }
 
     private var debugWindow: Window? = null
@@ -102,10 +129,19 @@ class DebugUI(val engine: Engine) : ScreenAdapter() {
 
                     it.row()
 
-                    it.add(Utils.visUI_customCheckBox("DEBUG_ENTITIES_BB", Engine.DEBUG_ENTITIES_BB).also {
-                        it.onChange {
-                            Engine.DEBUG_ENTITIES_BB = !Engine.DEBUG_ENTITIES_BB
-                        }
+                    it.add(Table().also {
+                        it.left()
+                        it.add(Utils.visUI_customCheckBox("DEBUG_ENTITIES_BB", Engine.DEBUG_ENTITIES_BB).also {
+                            it.onChange {
+                                Engine.DEBUG_ENTITIES_BB = !Engine.DEBUG_ENTITIES_BB
+                            }
+                        })
+
+                        it.add(Utils.visUI_customCheckBox("X-RAY", Engine.DEBUG_ENTITIES_BB_X_RAY).also {
+                            it.onChange {
+                                Engine.DEBUG_ENTITIES_BB_X_RAY= !Engine.DEBUG_ENTITIES_BB_X_RAY
+                            }
+                        }).padLeft(7f)
                     })
 
                     it.row().padTop(10f)
@@ -139,7 +175,18 @@ class DebugUI(val engine: Engine) : ScreenAdapter() {
                             Engine.DEBUG_UI_HIDE_STATIC_ENTITY_INFO = !Engine.DEBUG_UI_HIDE_STATIC_ENTITY_INFO
                         }
                     })
+                    it.row().padTop(10f)
+                    it.add(Utils.visUI_customCheckBox("DEBUG_PATHFINDING", Engine.DEBUG_PATHFINDING).also {
+                        it.onChange {
+                            Engine.DEBUG_PATHFINDING = !Engine.DEBUG_PATHFINDING
+                        }
+                    })
                     it.row()
+                    it.add(Utils.visUI_customCheckBox("DEBUG_CELL_FLOOD_FILL", Engine.DEBUG_CELL_FLOOD_FILL).also {
+                        it.onChange {
+                            Engine.DEBUG_CELL_FLOOD_FILL = !Engine.DEBUG_CELL_FLOOD_FILL
+                        }
+                    })
                 })
             }
         }
@@ -292,12 +339,12 @@ class DebugUI(val engine: Engine) : ScreenAdapter() {
 
     private val rectangleDrawStack= GdxArray<RectangleDrawOrder>()
 
-    fun drawDebugRectInWorldPosition(x: Float = 0f, y: Float = 0f, width: Float = 0f, height: Float = 0f, worldViewport: Viewport, fill: Boolean = true,
+    fun drawDebugRectInWorldPosition(x: Number = 0f, y: Number = 0f, width: Number = 0f, height: Number = 0f, worldViewport: Viewport, fill: Boolean = true,
                                      borderThickness: Float = 1f, color: Color = Color.WHITE) {
         val order = Pools.obtain(RectangleDrawOrder::class.java)
         var pos = Utils.projectPosition(x, y, worldViewport, stage.viewport)
         order.x = pos.x; order.y= pos.y
-        pos = Utils.projectPosition(x + width, y + height, worldViewport, stage.viewport)
+        pos = Utils.projectPosition(x.toFloat() + width.toFloat(), y.toFloat() + height.toFloat(), worldViewport, stage.viewport)
         order.width = pos.x - order.x; order.height= pos.y - order.y
 
         order.borderThickness = borderThickness

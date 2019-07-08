@@ -26,165 +26,166 @@ object Pathfinder {
         }
     }
 
-    fun findPath(start: MapCell, goalCell: MapCell, validator: MapCellValidator = defaultValidator()): Array<MapCell>? {
-        fun findIt(start: MapCell, goalCell: MapCell, validator: MapCellValidator): Array<MapCell>? {
-            if (!validator.isMapCellValid(start)) throw RuntimeException("Pathfinding fatal error: start position is invalid")
-            if (!validator.isMapCellValid(goalCell)) return null
+    /** Max number of cells checked before giving up searching. -1 to never give up, so maximum cells checked = number of cells in map.
+     * This can avoid looping through the entire map when the destination is unreachable,
+     * but it might cause the algorithm to not find a complex but successful path */
+    var maximumTries = 1500
 
-            val affectedMapCells = Array<MapCell>() // to reset them after
+    var allowDiagonals = false
 
-            val openList = Array<MapCell>() // the list containing to-be inspected MapCells
-            val closedList = Array<MapCell>() // the list containing inspected MapCells
+    fun findPath(start: MapCell, goalCell: MapCell, validator: MapCellValidator = defaultValidator(), ignoreInvalidCells: Boolean = false): Array<MapCell>? {
+        var ignoreInvalidCells = ignoreInvalidCells
+        if (!validator.isMapCellValid(start)) ignoreInvalidCells = true //throw RuntimeException("Pathfinding fatal error: start position is invalid")
+        if (!validator.isMapCellValid(goalCell)) ignoreInvalidCells = true
 
-            openList.add(start)
-            affectedMapCells.add(start)
+        // todo: right now the flood fill optimization is not compatible with diagonals
+        if (!allowDiagonals && start.map.doFloodFillForSolidCellsPathfinding
+                && start.floodRegion == goalCell.floodRegion
+                && start.pathfindingFloodIndex != goalCell.pathfindingFloodIndex
+                && start.pathfindingFloodIndex != -1L && goalCell.pathfindingFloodIndex != -1L) {
+            ignoreInvalidCells = true
+        }
 
-            // we initialize start here, other MapMapCells are initialized in MapCell code,
-            // when first interacted with in getCellNeighbors
-            start.node.g = 0f
-            start.node.f = start.node.g + getHeuristic(start, goalCell)
-            start.node.cameFrom = null
+        val affectedMapCells = Array<MapCell>() // to reset them after
 
-            fun constructPath(): Array<MapCell> {
-                var mapCell: MapCell? = goalCell
+        val openList = Array<MapCell>() // the list containing to-be inspected MapCells
+        val closedList = Array<MapCell>() // the list containing inspected MapCells
 
-                // going through the parents (cameFrom) from the end mapCell, you get the final path
-                val path = Array<MapCell>()
+        openList.add(start)
+        affectedMapCells.add(start)
 
-                while (mapCell != null) {
-                    path.add(mapCell)
-                    mapCell = mapCell.node.cameFrom
+        // we initialize start here, other MapMapCells are initialized in MapCell code,
+        // when first interacted with in getCellNeighbors
+        start.node.g = 0f
+        start.node.f = start.node.g + getHeuristic(start, goalCell)
+        start.node.cameFrom = null
 
-                    // skip first node
-                    /*if (mapCell != null && mapCell.node.cameFrom == null)
-                        break;*/
-                }
-                path.reverse()
+        fun constructPath(): Array<MapCell> {
+            var mapCell: MapCell? = goalCell
 
-                clearMapCells(affectedMapCells)
+            // going through the parents (cameFrom) from the end mapCell, you get the final path
+            var path = Array<MapCell>()
 
-                return path
+            while (mapCell != null) {
+                path.add(mapCell)
+                mapCell = mapCell.node.cameFrom
+
+                // skip first node
+                if (mapCell != null && mapCell.node.cameFrom == null) break
             }
 
-            // get the MapCell with the lowest f value
-            var count = 0
-            while (openList.size != 0 && count < 20000) {
-                count++
+            path.reverse()
 
-                var lowestF = java.lang.Float.POSITIVE_INFINITY
-                var current: MapCell? = null
-                for (n in openList) {
-                    if (n.node.f < lowestF) {
-                        lowestF = n.node.f
-                        current = n
-                    }
-                }
+            if (ignoreInvalidCells) {
+                val actualPath = Array<MapCell>()
+                val oldPath = path
+                path = actualPath
 
-                if (current == null) throw RuntimeException("Pathfinding fatal error: current is null")
+                var startValid = validator.isMapCellValid(start)
 
-                // if found goalCell
-                if (current === goalCell) {
-                    printDebug("SEARCH OF PATH FINISHED, count was $count")
-
-                    constructPath()
-                }
-
-                openList.removeValue(current, true)
-                closedList.add(current)
-
-                // get all neighbor MapCells of current MapCell
-                // this is done with the method of the class MapCell
-                // and it's there where invalid MapCells get ignored (solids/ walls through diagonals...)
-                val neigh = getCellNeighbors(current, goalCell, validator)
-
-                // if getCellNeighbors found the goal, return the path without checking for other neighbors
-                if (neigh.size == 1 && neigh.get(0) === goalCell) {
-                    if (count > 50)
-                        printDebug("SEARCH OF PATH FINISHED, count was $count")
-
-                    for (n in neigh) {
-                        affectedMapCells.add(n)
-                    }
-
-                    neigh.get(0).node.cameFrom = current
-                    return constructPath()
-                }
-
-
-                for (neighbor in neigh) {
-                    affectedMapCells.add(neighbor)
-
-                    // if it's inside a closed list, ignore the MapCell
-                    if (!closedList.contains(neighbor, true)) {
-
-                        // if it wasn't in an open list already, add it now
-                        if (!openList.contains(neighbor, true)) {
-                            openList.add(neighbor)
-                        }
-
-                        // get the g value of the neighbor MapCell from the current
-                        // you either do this with a MapCell that is in the open list (so that it already has a value)
-                        // in that case you compare the values and if this path is better, update that MapCell with the
-                        // new value and new parent (cameFrom)
-                        // if you do this with a MapCell that wasn't in the open list, you do the same, but since the MapCell
-                        // has the default g value (infinite), the new g is always updated as better
-                        val g2: Float
-                        if (neighbor.x != current.x && neighbor.y != current.y) {
-                            g2 = current.node.g + 14.14f // diagonal cost
-                        } else {
-                            g2 = current.node.g + 10 // not diagonal
-                        }
-
-                        if (g2 < neighbor.node.g) { // path is better
-                            neighbor.node.cameFrom = current
-                            neighbor.node.g = g2
-                            neighbor.node.f = neighbor.node.g + getHeuristic(neighbor, goalCell)
-                        }
-                    }
+                for (cell in oldPath) {
+                    // skip the rest of the path when you hit the first invalid cell
+                    // this might happen when ignoring invalid cells, and allows you to construct the closest path even if you can't reach the goal
+                    if (!validator.isMapCellValid(cell)) {
+                        if (startValid) break
+                    } else startValid = true
+                    path.add(cell)
                 }
             }
 
             clearMapCells(affectedMapCells)
-            printDebug("SEARCH OF PATH FAILED!! count is $count")
-            return null // return empty list when the pathfinding fails
+
+            return path
         }
 
-        return findIt(start, goalCell, validator)
-//        var currentGoal = goalCell
-//        var result: Array<MapCell>?
-//        while (true) {
-//            result = findIt(start, currentGoal, validator)
-//
-//            if (result == null) {
-//                var newGoal: MapCell? = null
-//
-//                while (newGoal == null) {
-//                    var bestCell: MapCell? = null
-//                    var bestValidCell: MapCell? = null
-//                    var minValue = Float.MAX_VALUE
-//                    // get all neighbors, no matter whether they are actually valid
-//                    for (cell in getCellNeighbors(currentGoal, null, object : MapCellValidator() {
-//                        override fun isMapCellValid(mapCell: MapCell): Boolean {
-//                            return true
-//                        }
-//                    })) {
-//                        val newValue = getHeuristic(cell, start)
-//                        if (newValue < minValue) {
-//                            minValue = newValue
-//                            bestValidCell = cell
-//                        }
-//                    }
-//
-//                    newGoal = bestValidCell
-//                }
-//
-//                currentGoal = newGoal
-//                continue
-//            } else return result
-//        }
+        // get the MapCell with the lowest f value
+        var count = 0
+        while (openList.size != 0 && count < maximumTries) {
+            count++
+
+            var lowestF = java.lang.Float.POSITIVE_INFINITY
+            var current: MapCell? = null
+            for (n in openList) {
+                if (n.node.f < lowestF) {
+                    lowestF = n.node.f
+                    current = n
+                }
+            }
+
+            if (current == null) throw RuntimeException("Pathfinding fatal error: current is null")
+
+            // if goalCell is found
+            if (current === goalCell) {
+                printDebug("SEARCH OF PATH FINISHED, count was $count")
+
+                return constructPath()
+            }
+
+            openList.removeValue(current, true)
+            closedList.add(current)
+
+            // get all neighbor MapCells of current MapCell
+            // this is done with the method of the class MapCell
+            // and it's there where invalid MapCells get ignored (solids / walls through diagonals...)
+            val neigh = getCellNeighbors(current, goalCell, validator, ignoreInvalidCells)
+
+            // if getCellNeighbors found the goal, return the path without checking for other neighbors
+            if (neigh.size == 1 && neigh.get(0) === goalCell) {
+                if (count > 50)
+                    printDebug("SEARCH OF PATH FINISHED, count was $count")
+
+                for (n in neigh) {
+                    affectedMapCells.add(n)
+                }
+
+                neigh.get(0).node.cameFrom = current
+                return constructPath()
+            }
+
+            for (neighbor in neigh) {
+                affectedMapCells.add(neighbor)
+
+                // if it's inside a closed list, ignore the MapCell
+                if (!closedList.contains(neighbor, true)) {
+
+                    // if it wasn't in an open list already, add it now
+                    if (!openList.contains(neighbor, true)) {
+                        openList.add(neighbor)
+                    }
+
+                    // get the g value of the neighbor MapCell from the current
+                    // you either do this with a MapCell that is in the open list (so that it already has a value)
+                    // in that case you compare the values and if this path is better, update that MapCell with the
+                    // new value and new parent (cameFrom)
+                    // if you do this with a MapCell that wasn't in the open list, you do the same, but since the MapCell
+                    // has the default g value (infinite), the new g is always updated as better
+                    var g2: Float
+                    if (neighbor.x != current.x && neighbor.y != current.y) {
+                        g2 = current.node.g + 14.14f // diagonal cost
+                    } else {
+                        g2 = current.node.g + 10 // not diagonal
+                    }
+
+                    if (ignoreInvalidCells && !validator.isMapCellValid(current)) g2 *= 1.7f
+
+                    if (g2 < neighbor.node.g) { // path is better
+                        neighbor.node.cameFrom = current
+                        neighbor.node.g = g2
+                        neighbor.node.f = neighbor.node.g + getHeuristic(neighbor, goalCell)
+                    }
+                }
+            }
+        }
+
+        clearMapCells(affectedMapCells)
+        printDebug("SEARCH OF PATH FAILED!! count is $count")
+        if (ignoreInvalidCells) return Array()
+
+        // pathfinding failed, try again ignoring invalid cells to get the closest path before hitting invalid cells
+        return findPath(start, goalCell, validator, true)
     }
 
-    private fun getCellNeighbors(cell: MapCell, goalCell: MapCell?, validator: MapCellValidator): Array<MapCell> {
+    private fun getCellNeighbors(cell: MapCell, goalCell: MapCell?, validator: MapCellValidator, ignoreInvalidCells: Boolean): Array<MapCell> {
         val neighbors = Array<MapCell>()
 
         for (x in -1..1) {
@@ -198,18 +199,18 @@ object Pathfinder {
                 if (cell.map.isInsideMap(xx.toFloat(), yy.toFloat())) {
                     val current = cell.map.getMapCell(xx, yy)
 
-                    // is current the goal node? return a list with only that node
-                    if (current === goalCell) {
-                        val l = Array<MapCell>()
-                        l.add(current)
-                        return l
-                    }
+//                    // is current the goal node? return a list with only that node
+//                    if (current === goalCell) {
+//                        val l = Array<MapCell>()
+//                        l.add(current)
+//                        return l
+//                    }
 
-                    if (validator.isMapCellValid(current)) {
+                    if (validator.isMapCellValid(current) || ignoreInvalidCells) {
                         var valid = true
 
                         // find diagonal neighbors and discard invalid ones
-                        if (xx != cell.x && yy != cell.y) {
+                        if (!allowDiagonals && xx != cell.x && yy != cell.y) {
                             // check if the diagonal block is not surrounded by 1 or 2 solids
                             if (xx < cell.x && yy > cell.y) {
                                 if (!validator.isMapCellValidRawCoords(xx + 1, yy, cell.map) || !validator.isMapCellValidRawCoords(xx, yy - 1, cell.map))
@@ -258,8 +259,8 @@ object Pathfinder {
     private fun clearMapCells(MapCells: Array<MapCell>) {
         for (mapCell in MapCells) {
             // flash affected cells
-            if (Engine.PATHFINDING_CELL_FLASH)
-                mapCell.debugFlashingThing.flashColor(Color.GREEN, 1f)
+            if (Engine.DEBUG_PATHFINDING)
+                mapCell.debugFlashingRect.flashColor(Color.GREEN, 1f)
 
             mapCell.node.reset()
         }

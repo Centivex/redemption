@@ -32,7 +32,7 @@ import com.kotcrab.vis.ui.widget.VisSlider
 import com.dcostap.Engine
 import com.dcostap.printDebug
 import ktx.actors.onChange
-import ktx.collections.GdxArray
+import ktx.collections.*
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.util.*
@@ -80,6 +80,22 @@ inline fun <T1: Any, T2: Any> ifNull(p1: T1?, p2: T2?, block: ()->Unit): Unit? {
 inline fun <T1: Any, T2: Any, T3: Any> ifNull(p1: T1?, p2: T2?, p3: T3?, block: ()->Unit): Unit? {
     return if (p1 == null || p2 == null || p3 == null) block() else null
 }
+
+fun Rectangle.fixNegatives() {
+    if (this.width < 0) {
+        this.x += width
+        this.width = -width
+    }
+
+    if (this.height < 0) {
+        this.y += height
+        this.height = -height
+    }
+}
+
+fun Rectangle.middleX() = x + width / 2f
+
+fun Rectangle.middleY() = y + height / 2f
 
 fun <T : Actor> Cell<T>.padTopBottom(pad: Float): Cell<T> {
     this.padTop(pad)
@@ -129,14 +145,14 @@ inline val Int.float: Float
 inline val Double.float: Float
     get() = this.toFloat()
 
-fun pixelsToUnits(pixels: Number): Float = pixels.toInt().toFloat() / Engine.PPM
-fun unitsToPixels(units: Number): Float = units.toInt().toFloat() * Engine.PPM
+fun pixelsToUnits(pixels: Number): Float = pixels.toFloat() / Engine.PPM
+fun unitsToPixels(units: Number): Float = units.toFloat() * Engine.PPM
 
 inline val Number.unitsToPixels: Float
     get() = MathUtils.floor(this.toFloat() * Engine.PPM).toFloat()
 
 inline val Number.pixelsToUnits: Float
-    get() = this.toInt().toFloat() / Engine.PPM
+    get() = this.toFloat() / Engine.PPM
 
 fun Exception.getFullString(): String {
     val sw = StringWriter()
@@ -186,6 +202,82 @@ fun Table.padLeftRight(pad: Float): Table {
     return this.padRight(pad)
 }
 
+val outlineShader = ShaderProgram(
+        "uniform mat4 u_projTrans;\n" +
+        "\n" +
+        "attribute vec4 a_position;\n" +
+        "attribute vec2 a_texCoord0;\n" +
+        "attribute vec4 a_color;\n" +
+        "\n" +
+        "varying vec4 v_color;\n" +
+        "varying vec2 v_texCoord;\n" +
+        "\n" +
+        "uniform vec2 u_viewportInverse;\n" +
+        "\n" +
+        "void main() {\n" +
+        "    gl_Position = u_projTrans * a_position;\n" +
+        "    v_texCoord = a_texCoord0;\n" +
+        "    v_color = a_color;\n" +
+        "\n" +
+        "}", "#ifdef GL_ES\n" +
+        "precision mediump float;\n" +
+        "precision mediump int;\n" +
+        "#endif\n" +
+        "\n" +
+        "uniform sampler2D u_texture;\n" +
+        "\n" +
+        "// The inverse of the viewport dimensions along X and Y\n" +
+        "uniform vec2 u_viewportInverse;\n" +
+        "\n" +
+        "// Color of the outline\n" +
+        "uniform vec3 u_color;\n" +
+        "\n" +
+        "// Thickness of the outline\n" +
+        "uniform float u_offset;\n" +
+        "\n" +
+        "// Step to check for neighbors\n" +
+        "uniform float u_step;\n" +
+        "\n" +
+        "// U and V of sprite\n" +
+        "uniform vec2 u_u;\n" +
+        "uniform vec2 u_v;\n" +
+        "\n" +
+        "varying vec4 v_color;\n" +
+        "varying vec2 v_texCoord;\n" +
+        "\n" +
+        "#define ALPHA_VALUE_BORDER 0.5\n" +
+        "\n" +
+        "void main() {\n" +
+        "   vec2 T = v_texCoord.xy;\n" +
+        "\n" +
+        "   float alpha = 0.0;\n" +
+        "   bool allin = true;\n" +
+        "   for( float ix = -u_offset; ix < u_offset; ix += u_step )\n" +
+        "   {\n" +
+        "      for( float iy = -u_offset; iy < u_offset; iy += u_step )\n" +
+        "      {\n" +
+        "            vec2 samplePos = T + vec2(ix, iy) * u_viewportInverse;\n" +
+        "\n" +
+        "            samplePos.x = clamp(samplePos.x, u_u.x, u_u.y);\n" +
+        "            samplePos.y = clamp(samplePos.y, u_v.x, u_v.y);\n" +
+        "\n" +
+        "            float newAlpha = texture2D(u_texture, samplePos).a;\n" +
+        "            allin = allin && newAlpha > ALPHA_VALUE_BORDER;\n" +
+        "            if (newAlpha > ALPHA_VALUE_BORDER && newAlpha >= alpha)\n" +
+        "            {\n" +
+        "               alpha = newAlpha;\n" +
+        "            }\n" +
+        "      }\n" +
+        "   }\n" +
+        "   if (allin)\n" +
+        "   {\n" +
+        "      alpha = 0.0;\n" +
+        "   }\n" +
+        "\n" +
+        "   gl_FragColor = vec4(u_color,alpha);\n" +
+        "}"
+)
+
 val tintShader = ShaderProgram("attribute vec4 a_position;\n" +
         "attribute vec4 a_color;\n" +
         "attribute vec2 a_texCoord0;\n" +
@@ -214,9 +306,37 @@ val tintShader = ShaderProgram("attribute vec4 a_position;\n" +
         "    gl_FragColor = v_color * texture2D(u_texture, v_texCoords) + u_emissive;\n" +
         "}")
 
+val colorShader = ShaderProgram("attribute vec4 a_position;\n" +
+        "attribute vec4 a_color;\n" +
+        "attribute vec2 a_texCoord0;\n" +
+        "uniform mat4 u_projTrans;\n" +
+        "varying vec2 v_texCoords;\n" +
+        "varying vec4 v_color;\n" +
+        "\n" +
+        "void main()\n" +
+        "{\n" +
+        "    v_color = a_color;\n" +
+        "    v_texCoords = a_texCoord0;\n" +
+        "    gl_Position =  u_projTrans * a_position;\n" +
+        "}", "#ifdef GL_ES\n" +
+        "#define LOWP lowp\n" +
+        "precision mediump float;\n" +
+        "#else\n" +
+        "#define LOWP\n" +
+        "#endif\n" +
+        "\n" +
+        "varying vec4 v_color;\n" +
+        "varying vec2 v_texCoords;\n" +
+        "uniform sampler2D u_texture;\n" +
+        "uniform vec4 u_emissive;\n" +
+        "\n" +
+        "void main() {\n" +
+        "    gl_FragColor = vec4(u_emissive.rgb, texture2D(u_texture, v_texCoords).a);\n" +
+        "}")
+
 val colorDummy = Color()
 
-/** Using shaders, tints batch to the color specified. Color.BLACK means no tinting. To tint black, use batch.setColor() instead */
+/** Using shaders, tints batch to the color specified. Color.BLACK means no tinting. */
 inline fun Batch.tint(color: Color, f: () -> Unit) {
     flush()
     shader = tintShader
@@ -225,7 +345,42 @@ inline fun Batch.tint(color: Color, f: () -> Unit) {
     tintShader.setUniformf("u_emissive", colorDummy)
     f()
     flush()
-    tintShader.setUniformf("u_emissive", Color.CLEAR)
+    shader = null
+}
+
+/** Using shaders, replaces all non transparent pixels with the color specified. */
+inline fun Batch.color(color: Color, f: () -> Unit) {
+    flush()
+    shader = colorShader
+    colorDummy.set(color)
+    colorDummy.a = 0f
+    colorShader.setUniformf("u_emissive", colorDummy)
+    f()
+    flush()
+    shader = null
+}
+
+/** Using shaders, replaces all non transparent pixels with the color specified. */
+inline fun Batch.drawOutline(textureRegion: TextureRegion, outlineSize: Float, color: Color, f: () -> Unit) {
+    val sprite = textureRegion
+    flush()
+    shader = outlineShader
+
+    outlineShader.begin()
+    outlineShader.setUniformf("u_viewportInverse", Vector2(1f / sprite.texture.width, 1f / sprite.texture.height))
+    outlineShader.setUniformf("u_offset", outlineSize)
+    outlineShader.setUniformf("u_step", Math.min(1f, 1f))
+    outlineShader.setUniformf("u_color", Vector3(color.r, color.g, color.b))
+    if(sprite.isFlipX)
+        outlineShader.setUniformf("u_u", Vector2(sprite.u2, sprite.u))
+    else
+        outlineShader.setUniformf("u_u", Vector2(sprite.u, sprite.u2))
+    outlineShader.setUniformf("u_v", Vector2(sprite.v, sprite.v2))
+    outlineShader.end()
+
+    f()
+    flush()
+    shader = null
 }
 
 /** Percentage of application's height, rounded to closest integer */
@@ -246,6 +401,13 @@ fun percentOfViewportHeight(percent: Number, viewport: Viewport): Float {
 fun newRectangle(x: Number = 0f, y: Number = 0f, width: Number = 0f, height: Number = 0f): Rectangle {
     return Rectangle().also {it.x = x.toFloat(); it.y = y.toFloat(); it.width = width.toFloat(); it.height = height.toFloat()}
 }
+
+/** x & y are the origin in the middle */
+fun newRectangleFromPoint(x: Number = 0f, y: Number = 0f, width: Number = 0f, height: Number = 0f): Rectangle {
+    return Rectangle().also {it.x = x.toFloat() - width.toFloat() / 2f; it.y = y.toFloat() - height.toFloat() / 2f;
+        it.width = width.toFloat(); it.height = height.toFloat()}
+}
+
 /** Translates input into Engine units (Engine.PPM) */
 fun newRectanglePixels(xPixels: Number = 0f, yPixels: Number = 0f, widthPixels: Number = 0f, heightPixels: Number = 0f): Rectangle {
     return Rectangle().also {
@@ -254,8 +416,9 @@ fun newRectanglePixels(xPixels: Number = 0f, yPixels: Number = 0f, widthPixels: 
     }
 }
 
-fun newRectangleFromRegion(region: TextureRegion): Rectangle {
-    return newRectanglePixels(0f, 0f, region.regionWidth, region.regionHeight)
+fun newRectangleFromRegion(region: TextureRegion, centerX: Boolean = false, centerY: Boolean = false): Rectangle {
+    return newRectanglePixels(if (centerX) -region.regionWidth / 2f else 0f, if (centerY) -region.regionHeight / 2f else 0f,
+            region.regionWidth, region.regionHeight)
 }
 
 fun IntArray.getRandom(): Int = get(Utils.randomInt(size))
@@ -399,6 +562,53 @@ object Utils {
             value
     }
 
+    val colors = GdxMap<String, Color>()
+
+    init {
+        colors.clear()
+        colors.put("CLEAR", Color.CLEAR)
+        colors.put("BLACK", Color.BLACK)
+
+        colors.put("WHITE", Color.WHITE)
+        colors.put("LIGHT_GRAY", Color.LIGHT_GRAY)
+        colors.put("GRAY", Color.GRAY)
+        colors.put("DARK_GRAY", Color.DARK_GRAY)
+
+        colors.put("BLUE", Color.BLUE)
+        colors.put("NAVY", Color.NAVY)
+        colors.put("ROYAL", Color.ROYAL)
+        colors.put("SLATE", Color.SLATE)
+        colors.put("SKY", Color.SKY)
+        colors.put("CYAN", Color.CYAN)
+        colors.put("TEAL", Color.TEAL)
+
+        colors.put("GREEN", Color.GREEN)
+        colors.put("CHARTREUSE", Color.CHARTREUSE)
+        colors.put("LIME", Color.LIME)
+        colors.put("FOREST", Color.FOREST)
+        colors.put("OLIVE", Color.OLIVE)
+
+        colors.put("YELLOW", Color.YELLOW)
+        colors.put("GOLD", Color.GOLD)
+        colors.put("GOLDENROD", Color.GOLDENROD)
+        colors.put("ORANGE", Color.ORANGE)
+
+        colors.put("BROWN", Color.BROWN)
+        colors.put("TAN", Color.TAN)
+        colors.put("FIREBRICK", Color.FIREBRICK)
+
+        colors.put("RED", Color.RED)
+        colors.put("SCARLET", Color.SCARLET)
+        colors.put("CORAL", Color.CORAL)
+        colors.put("SALMON", Color.SALMON)
+        colors.put("PINK", Color.PINK)
+        colors.put("MAGENTA", Color.MAGENTA)
+
+        colors.put("PURPLE", Color.PURPLE)
+        colors.put("VIOLET", Color.VIOLET)
+        colors.put("MAROON", Color.MAROON)
+    }
+
     /** Like [map] but with a simple percentage as input values.
      * Point1 may be higher value than point2
      *
@@ -443,10 +653,11 @@ object Utils {
      * Adapted from https://stackoverflow.com/a/30688774. Transforms input to Double and adds magnitudes to it. Should cover
      * all range of values of Long but not all from Double
      */
-    @JvmStatic fun formatNumber(number: Number, normalDecimals: Int = 0, magnitudeDecimals: Int = 2, ignoreThousandsMagnitude: Boolean = false,
-                     ignoreMagnitudesUntil: Number = -1,
+    @JvmStatic fun formatNumber(number: Number, normalDecimals: Int = 0, includeMagnitudes: Boolean = true, magnitudeDecimals: Int = 2,
+                                ignoreThousandsMagnitude: Boolean = false, ignoreMagnitudesUntil: Number = -1,
                      magnitudes: kotlin.Array<String> = Utils.magnitudes): String
     {
+        if (!includeMagnitudes) return doTheFormat(number.toDouble(), normalDecimals)
         fun doesNotNeedMagnitude(number: Double, originalNumber: Boolean = true): Boolean {
             return number < 1000 || (number < 1_000_000 && ignoreThousandsMagnitude && originalNumber)
                     || (number < ignoreMagnitudesUntil.toDouble() && ignoreMagnitudesUntil != -1 && originalNumber)
@@ -510,7 +721,7 @@ object Utils {
             }
 
             fun format(number: Number): String {
-                return formatNumber(number, decimals, 3, true)
+                return formatNumber(number, decimals, true, 3, true)
             }
 
             it.add(Table().also {

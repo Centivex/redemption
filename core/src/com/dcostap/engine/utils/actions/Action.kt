@@ -23,12 +23,12 @@ abstract class Action @JvmOverloads constructor(duration: Float, interpolation: 
         }
 
         if (!pauseTimer) interpolator.update(delta)
-        updateProgress(interpolator.getPercentValue())
+        updateProgress(interpolator.getPercentValue(), delta)
     }
 
     /** @param percent Progress from 0 to 1 (completed) affected by interpolation.
      * Note that interpolation is already applied, and progress may go above 1 */
-    abstract fun updateProgress(percent: Float)
+    abstract fun updateProgress(percent: Float, delta: Float)
 
     /** Always runs before finishing, even if the duration is 0 */
     abstract fun finalUpdate()
@@ -50,6 +50,7 @@ abstract class Action @JvmOverloads constructor(duration: Float, interpolation: 
         @JvmStatic fun run(delay: Float, function: () -> Unit) = RunAction(delay, function)
         @JvmStatic fun update(duration: Float, function: () -> Unit) = UpdateAction(duration, function)
         @JvmStatic fun run(function: () -> Unit) = RunAction(0f, function)
+        @JvmStatic fun runUntil(function: (Float) -> Boolean) = RunUntil(0f, function)
         @JvmStatic fun wait(delay: Float) = WaitAction(delay)
         @JvmStatic fun sequence(vararg actions: Action) = SequenceAction(*actions)
         @JvmStatic fun parallel(vararg actions: Action) = ParallelAction(*actions)

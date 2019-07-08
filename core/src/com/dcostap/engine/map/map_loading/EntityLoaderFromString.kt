@@ -15,11 +15,13 @@ interface EntityLoaderFromString {
      * @param heightPixels Depending on object created, may be used or ignored; same with width
      */
     fun loadEntityFromTiledTileObject(imageName: String, objectName: String, position: Vector2, widthPixels: Int, heightPixels: Int,
+                                      depth: Int,
                                       map: EntityTiledMap, objectProps: CustomProperties): Entity?
 
     /**
      * Load Entity associated with a Tiled's Object (not a TileObject). Identified by its name
      */
     fun loadEntityFromObjectName(objectName: String, position: Vector2, widthPixels: Int, heightPixels: Int,
+                                 depth: Int,
                                  map: EntityTiledMap, objectProps: CustomProperties): Entity?
 }

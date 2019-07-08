@@ -3,7 +3,7 @@ apply plugin: 'kotlin'
 sourceCompatibility = 1.7
 sourceSets.main.java.srcDirs = [ "src/" ]
 
-project.ext.mainClassName = "com.pixel.udf.desktop.DesktopLauncher"
+project.ext.mainClassName = "com.pixel.sk.desktop.DesktopLauncher"
 project.ext.assetsDir = new File("../android/assets")
 
 project.ext.texturePacker = ["../android/assets/atlas/textures_finished", "../android/assets/atlas", "atlas"]

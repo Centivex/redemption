@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.dcostap.engine.utils.addAction
 import com.dcostap.engine.utils.ui.*
-import com.dcostap.udf.GameScreen
+import com.dcostap.game.GameScreen
 
 /**
  * Created by Darius on 26/02/2018.

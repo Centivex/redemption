@@ -53,6 +53,8 @@ abstract class CollidingEntity @JvmOverloads constructor(position: Vector2 = Vec
     private var collidedX = 0
     private var collidedY = 0
 
+    var jumpWhenInsideCollision = true
+
     /** List of valid (only solid ones by default) entities that the object collided with in this frame, while resolving collision
      * Use it with hasCollidedX to find out in which direction it collided with those entities
      *
@@ -68,7 +70,7 @@ abstract class CollidingEntity @JvmOverloads constructor(position: Vector2 = Vec
 
     /** default: false; set it to true so that collisionResponse is done without using CollisionTree (less expensive).
      *
-     * If true collisionResponse will only check for MapCells filtered in
+     * If true collisionResponse will only check for MapCells filtered in [filterMapCellForCollision]
      * @see MapCell
      */
     var onlyCollideAgainstMapCells = false
@@ -159,6 +161,11 @@ abstract class CollidingEntity @JvmOverloads constructor(position: Vector2 = Vec
 
         // was already colliding with solid? go back like crazy
         if (isCollidingWithOneEntityValidForCollisionResponse(delta)) {
+            if (!jumpWhenInsideCollision) {
+                super.move(xAdd, yAdd, true, delta)
+                return
+            }
+
             var count = 0
 
             findAllCollidingEntitiesValidForCollisionResponse(collidingEntitiesX, delta)
@@ -262,6 +269,10 @@ abstract class CollidingEntity @JvmOverloads constructor(position: Vector2 = Vec
 
         // was already colliding with solid? go back like crazy
         if (isCollidingWithMapCell()) {
+            if (!jumpWhenInsideCollision) {
+                super.move(xAdd, yAdd, true, delta)
+                return
+            }
             var count = 0
             while (count < 1000) {
                 count++

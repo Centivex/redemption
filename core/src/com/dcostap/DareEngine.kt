@@ -13,24 +13,33 @@ import com.dcostap.engine.utils.actions.ActionsUpdater
 import com.dcostap.engine.utils.font_loaders.smart_font_generator.SmartFontGenerator
 import com.dcostap.engine.utils.screens.BaseScreen
 import com.dcostap.engine.utils.screens.BaseScreenWithUI
+import com.dcostap.game.GameScreen
 import com.kotcrab.vis.ui.VisUI
-import com.dcostap.udf.GameScreen
 import java.text.SimpleDateFormat
 import java.util.*
+
+class Settings {
+    var scaling = 0
+    var fullscreen = false
+}
 
 class Engine : ApplicationListener {
     companion object Info {
         //region Configuration stuff
-        val ORIG_APP_WIDTH = 288
-        val ORIG_APP_HEIGHT = 162
+        val APP_WIDTH = 288
+        val APP_HEIGHT = 162
 
-        var fullscreen = false
-        var scaling = 1
+        var settings = Settings()
 
         var isRelease = false
 
         /** Pixels per game unit */
         var PPM: Int = 16
+
+        /** password that, when typed, switches debug mode */
+        val DEBUG_PASSWORD = "DEBUG"
+
+        var ALLOW_DEBUG_PASSWORD = true
 
         /** set to false to make it easier to selectively choose which entities are included in map's colliding trees */
         var ENTITIES_PROVIDE_COLL_INFO_DEFAULT = true
@@ -48,10 +57,13 @@ class Engine : ApplicationListener {
 
         var DEBUG_MAP_CELLS = true
         var DEBUG_ENTITIES_BB = true
+        var DEBUG_ENTITIES_BB_X_RAY = true // debug drawing of Entities will be above normal drawing
 
         var DEBUG_COLLISION_TREE_CELLS = false
         var DEBUG_COLLISION_TREE_UPDATES = false
-        var PATHFINDING_CELL_FLASH = false
+
+        var DEBUG_PATHFINDING = false
+        var DEBUG_CELL_FLOOD_FILL = false
 
         var DEBUG_LINE_THICKNESS = 0.1f
         var DEBUG_TRANSPARENCY = 0.5f
@@ -62,31 +74,6 @@ class Engine : ApplicationListener {
             SmartFontGenerator.desktopDebugGenerateFontsOnHomeFolder = true
         }
         //endregion
-
-        //region Resolution stuff
-        var maxViewportHeight = 0
-        var maxViewportWidth = 0
-
-        var viewportHeight = 0
-        var viewportWidth = 0
-
-        fun calculateAppSizing(screenWidth: Int = Gdx.graphics.displayMode.width, screenHeight: Int = Gdx.graphics.displayMode.height) {
-            val mult = screenHeight / ORIG_APP_HEIGHT.toFloat()
-
-            var finalMult = MathUtils.floor(mult) - if (Utils.getDecimalPart(mult) < 0.35f)  1 else 0
-            if (finalMult % 2 != 0) finalMult--
-
-            viewportWidth = ORIG_APP_WIDTH
-            viewportHeight = ORIG_APP_HEIGHT
-            maxViewportWidth = viewportWidth
-            maxViewportHeight = viewportHeight
-            scaling = finalMult
-        }
-
-        fun updateWindowSize() {
-            Gdx.graphics.setWindowedMode(ORIG_APP_WIDTH * scaling,
-                    ORIG_APP_HEIGHT * scaling)
-        }
 
         /** This allows desktop density factor to be bigger, since eyes will be further away from screen than in a mobile device, it
          * is needed to increase the density factor by a bit; so it is multiplied by distance factor (default: 1.5) */
@@ -181,6 +168,7 @@ class Engine : ApplicationListener {
         when (string) {
             "debug" -> Engine.DEBUG = !Engine.DEBUG
             "ent" -> Engine.DEBUG_ENTITIES_BB = !Engine.DEBUG_ENTITIES_BB
+            "cells" -> Engine.DEBUG_MAP_CELLS = !Engine.DEBUG_MAP_CELLS
             "atlas" -> reloadAtlas()
             "window" -> debugWindow = !debugWindow
         }
@@ -218,13 +206,17 @@ class Engine : ApplicationListener {
     override fun resize(width: Int, height: Int) {
         screen?.resize(width, height)
         debugUI.resize(width, height)
-        calculateAppSizing()
     }
+
+    private var debugCurrentWritten = 0
+    private var debugCurrentWrittenTimer = 0f
 
     override fun render() {
         batch.totalRenderCalls = 0
         (debugUI.stage.batch as SpriteBatch).totalRenderCalls = 0
         if (screen != null && screen is BaseScreenWithUI) {((screen as BaseScreenWithUI).stage.batch as SpriteBatch).totalRenderCalls = 0}
+
+//        println(renderCalls)
 
         updateDelta()
         val delta = if (useFixedDelta) fixedDelta else smoothedDelta
@@ -237,7 +229,8 @@ class Engine : ApplicationListener {
                 debugUI.render(delta)
             }
         } catch(e: Exception) {
-            saveDebugLog("crashLog-${SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().time)}.txt")
+            if (isRelease)
+                saveDebugLog("crashLog-${SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().time)}.txt")
             dispose()
             throw e
         }
@@ -255,6 +248,22 @@ class Engine : ApplicationListener {
 
         if (DEBUG && Gdx.input.isKeyJustPressed(DEBUG_COMMAND_WINDOW_KEY)) {
             debugUI.openCloseDebugCommandsWindow()
+        }
+
+        if (ALLOW_DEBUG_PASSWORD && debugUI.consoleClosed) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.valueOf(DEBUG_PASSWORD[debugCurrentWritten].toString()))) {
+                debugCurrentWritten++
+                if (debugCurrentWritten >= DEBUG_PASSWORD.length) {
+                    debugCurrentWritten = 0
+                    Engine.DEBUG = !Engine.DEBUG
+                }
+                debugCurrentWrittenTimer = 1f
+            }
+
+            if (debugCurrentWrittenTimer > 0f) {
+                debugCurrentWrittenTimer -= delta
+                if (debugCurrentWrittenTimer <= 0f) debugCurrentWritten = 0
+            }
         }
     }
 

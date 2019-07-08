@@ -8,8 +8,8 @@ import com.dcostap.engine.utils.GameDrawer
 /**
  * Created by Darius on 06/04/2018.
  */
-open class DrawingWidget(assets: Assets, stage: Stage): OrderedTable() {
-    val gameDrawer = GameDrawer(stage.batch)
+open class DrawingWidget(stage: Stage): OrderedTable() {
+    val gameDrawer = GameDrawer(stage.batch).also { it.customPPM = 1; it.useCustomPPM = true }
     var drawingFunction: (self: DrawingWidget) -> Unit = {}
 
     override fun drawBackground(batch: Batch?, parentAlpha: Float, x: Float, y: Float) {

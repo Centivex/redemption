@@ -6,14 +6,24 @@ import ktx.collections.GdxArray
 /**
  * Created by Darius on 17/01/2018
  */
-open class Animation<T> @JvmOverloads constructor(val frames: GdxArray<T>, frameDuration: Float = 1f, var animType: AnimType = AnimType.LOOP) {
+open class Animation<T> @JvmOverloads constructor(frames: GdxArray<T>, frameDuration: Float = 1f, animType: AnimType = AnimType.LOOP) {
     var elapsedTime = 0f
     var isPaused = false
 
+    var animType: AnimType = animType
+        set(value) {
+            field = value
+            loopsFinished = 0
+        }
+
+    var frames = frames
+        set(value) {
+            field = value
+            updateTotalAnimationDuration()
+        }
+
     var totalAnimationDuration: Float = 0f
         private set
-
-
 
     /** -1 = deactivate */
     var stopWhenFinishedThisNumberOfLoops = -1
@@ -67,6 +77,7 @@ open class Animation<T> @JvmOverloads constructor(val frames: GdxArray<T>, frame
     fun update(delta: Float) {
         if (!isPaused) {
             finishedNormalAnimation = false
+            finishedReversedAnimation = false
             when (animType) {
                 AnimType.ONE_LOOP -> {
                     elapsedTime += delta
@@ -86,8 +97,9 @@ open class Animation<T> @JvmOverloads constructor(val frames: GdxArray<T>, frame
                 AnimType.REVERSED -> {
                     elapsedTime -= delta
                     if (finishedReversedAnimation()) {
-                        elapsedTime = totalAnimationDuration - 0.0001f
+                        elapsedTime = 0f
                         finishedOneLoop()
+                        isPaused = true
                     }
                 }
                 AnimType.REVERSED_LOOP -> {
@@ -135,6 +147,9 @@ open class Animation<T> @JvmOverloads constructor(val frames: GdxArray<T>, frame
     var finishedNormalAnimation: Boolean = false
         private set
 
+    var finishedReversedAnimation: Boolean = false
+        private set
+
     private fun finishedNormalAnimation(): Boolean {
         return (elapsedTime >= totalAnimationDuration).also { finishedNormalAnimation = it }
     }
@@ -143,8 +158,8 @@ open class Animation<T> @JvmOverloads constructor(val frames: GdxArray<T>, frame
      *
      *
      * More detailed: Returns true when the elapsed time is smaller than 0 */
-    fun finishedReversedAnimation(): Boolean {
-        return elapsedTime <= 0
+    private fun finishedReversedAnimation(): Boolean {
+        return (elapsedTime <= 0).also { finishedReversedAnimation = it }
     }
 
     private val frameFromElapsedTime: T
@@ -171,6 +186,7 @@ open class Animation<T> @JvmOverloads constructor(val frames: GdxArray<T>, frame
 
     fun reset() {
         finishedNormalAnimation = false
+        finishedReversedAnimation = false
         elapsedTime = 0f
         loopsFinished = 0
         isPaused = false

@@ -4,7 +4,7 @@ import com.badlogic.gdx.utils.Array
 import com.badlogic.gdx.utils.JsonValue
 import com.dcostap.engine.map.entities.CollidingEntity
 import com.dcostap.engine.map.entities.Entity
-import com.dcostap.engine.utils.FlashingThing
+import com.dcostap.engine.utils.FlashingRect
 import com.dcostap.engine.utils.JsonSavedObject
 import com.dcostap.engine.utils.addChildValue
 
@@ -14,6 +14,13 @@ import com.dcostap.engine.utils.addChildValue
 open class MapCell(val x: Int, val y: Int, private val cellSize: Int, val map: EntityTiledMap) {
     /** Use to directly mark the cell itself as solid*/
     var markedAsSolid = false
+        set(value) {
+            val orig = field
+            field = value
+
+            if (value != orig) map.floodFill(this)
+        }
+
     private var hasSolid = false
 
     /** Whether any static solid Entity occupies this cell *or* the cell is directly set as solid.
@@ -24,7 +31,7 @@ open class MapCell(val x: Int, val y: Int, private val cellSize: Int, val map: E
 
     var staticEntitiesAbove = Array<Entity>()
     var node = PathfindingNode()
-    val debugFlashingThing = FlashingThing()
+    val debugFlashingRect = FlashingRect()
 
     /** Each cell may have several tiles (graphical information) */
     private val tiles = Array<Tile>()
@@ -36,17 +43,24 @@ open class MapCell(val x: Int, val y: Int, private val cellSize: Int, val map: E
     }
 
     internal fun updateHasSolid() {
+        val orig = hasSolid
         hasSolid = false
         for (ent in staticEntitiesAbove) {
             if (ent.isSolid) {
                 hasSolid = true
-                return
+                break
             }
         }
+
+        if (orig != hasSolid) map.floodFill(this)
     }
 
     val middleX: Float get() = x + cellSize.toFloat() / 2f
     val middleY: Float get() = y + cellSize.toFloat() / 2f
+
+    /** Different numbers means you can't path-find from one cell to another. -1 means flood fill wasn't performed, so the optimization won't be used */
+    var pathfindingFloodIndex = -1L
+    var floodRegion = 0
 
     inner class PathfindingNode {
         var g: Float = 0f

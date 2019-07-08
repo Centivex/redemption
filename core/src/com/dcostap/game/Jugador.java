@@ -1,4 +1,4 @@
-package com.dcostap.udf;
+package com.dcostap.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -218,7 +218,9 @@ public class Jugador extends CollidingEntity {
             }
         }
 
-        gameDrawer.draw(frame, getX(), getY()-1f, 1f, 1f,0f, 0f, 0f, false, false, 0, 0, true, false);
+        gameDrawer.draw(frame, getX(), getY()-1f, 1f, 1f,0f, 0f, 0f,
+                false, false, 0, 0, -1, -1,
+                true, false);
 
 
         super.draw(gameDrawer, delta);

@@ -1,4 +1,4 @@
-package com.dcostap.udf;
+package com.dcostap.game;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -26,19 +26,22 @@ public class GameMapLoader implements EntityLoaderFromString, TileLoaderFromStri
         this.gs=gs;
     }
 
+    @Nullable
     @Override
     public Entity loadEntityFromTiledTileObject(@NotNull String imageName, @NotNull String objectName,
                                                 @NotNull Vector2 position, int widthPixels, int heightPixels,
-                                                @NotNull EntityTiledMap map, @NotNull CustomProperties objectProps) {
+                                                int depth, @NotNull EntityTiledMap map, @NotNull CustomProperties objectProps) {
         return null;
     }
 
+    @Nullable
     @Override
-    public Entity loadEntityFromObjectName(@NotNull String objectName, @NotNull Vector2 position, int widthPixels,
-                                           int heightPixels, @NotNull EntityTiledMap map, @NotNull CustomProperties objectProps) {
+    public Entity loadEntityFromObjectName(@NotNull String objectName, @NotNull Vector2 position,
+                                           int widthPixels, int heightPixels, int depth,
+                                           @NotNull EntityTiledMap map, @NotNull CustomProperties objectProps) {
         if (objectName.equals("solid")){
-        return new Entity(new Vector2(position), new Rectangle(0f, 0f, widthPixels / (float)Engine.Info.getPPM(),
-                heightPixels / (float)Engine.Info.getPPM()), true);
+            return new Entity(new Vector2(position), new Rectangle(0f, 0f, widthPixels / (float)Engine.Info.getPPM(),
+                    heightPixels / (float)Engine.Info.getPPM()), true);
         }
         else if (objectName.equals("player")){
             jugador = new Jugador(gs);

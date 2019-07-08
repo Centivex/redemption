@@ -100,7 +100,7 @@ class ExportedImagesProcessor {
                                 } else {
                                     printDebug("  (!) tile #$i is fully transparent, won't create new image")
                                 }
-
+                                
                                 newImage.dispose()
 
                                 i++

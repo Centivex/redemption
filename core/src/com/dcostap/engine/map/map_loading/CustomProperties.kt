@@ -19,6 +19,13 @@ class CustomProperties {
         }
     }
 
+    fun add(customProperties: CustomProperties) {
+        for (b in customProperties.booleans) booleans.put(b.key, b.value)
+        for (s in customProperties.strings) strings.put(s.key, s.value)
+        for (s in customProperties.floats) floats.put(s.key, s.value)
+        for (s in customProperties.ints) ints.put(s.key, s.value)
+    }
+
     override fun toString(): String {
         return booleans.toString() + ", " + ints.toString() + ", " + floats.toString() + ", " + strings.toString()
     }

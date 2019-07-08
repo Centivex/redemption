@@ -7,6 +7,7 @@ import com.dcostap.Engine
 import com.dcostap.engine.utils.JsonSavedObject
 import com.dcostap.engine.utils.Saveable
 import com.dcostap.engine.utils.addChildValue
+import com.dcostap.engine.utils.pixelsToUnits
 import java.lang.RuntimeException
 
 /**
@@ -80,9 +81,17 @@ open class BoundingBox(val entity: Entity, @Transient val name: String) : Saveab
         width = rectangle.width
         height = rectangle.height
         offsetX = rectangle.x
-
-        stopAdjustments = false
         offsetY = rectangle.y
+        stopAdjustments = false
+    }
+
+    fun modifyPixels(offsetX: Number, offsetY: Number, width: Number, height: Number) {
+        stopAdjustments = true
+        this.width = width.pixelsToUnits
+        this.height = height.pixelsToUnits
+        this.offsetX = offsetX.pixelsToUnits
+        this.offsetY = offsetY.pixelsToUnits
+        stopAdjustments = false
     }
 
     /** world coordinates, when applying [offsetX] to [Entity.x] */

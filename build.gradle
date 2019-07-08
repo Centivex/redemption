@@ -13,6 +13,7 @@ buildscript {
         }
     }
     dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.0'
         classpath "com.badlogicgames.gdx:gdx-tools:1.9.9"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
@@ -29,6 +30,7 @@ ext.getGitTagVersionName = { ->
         commandLine 'git', 'describe'
         standardOutput = stdout
     }
+
     return stdout.toString().trim()
 }
 
@@ -45,6 +47,7 @@ allprojects {
         ashleyVersion = '1.7.0'
         aiVersion = '1.8.0'
         visuiVersion = '1.4.1'
+        typingLabelVersion = '1.1.0'
     }
 
     repositories {
@@ -65,7 +68,7 @@ project(":desktop") {
 
     dependencies {
         compile project(":core")
-        compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
+        compile "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
     }
@@ -88,8 +91,10 @@ project(":core") {
         compile "io.github.libktx:ktx-collections:1.9.9-b1"
         compile "io.github.libktx:ktx-actors:1.9.9-b1"
         compile "com.kotcrab.vis:vis-ui:$visuiVersion"
-        compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
-        compile "com.github.rafaskb:typing-label:master-SNAPSHOT"
+        compile ("com.badlogicgames.gdx:gdx-tools:$gdxVersion") {
+            exclude group: 'com.badlogicgames.gdx', module: 'gdx-backend-lwjgl'
+        }
+        compile "com.github.rafaskb:typing-label:$typingLabelVersion"
     }
 }
 

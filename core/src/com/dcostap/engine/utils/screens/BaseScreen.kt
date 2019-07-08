@@ -11,7 +11,6 @@ import com.dcostap.engine.utils.GameDrawer
 import com.dcostap.engine.utils.Updatable
 import com.dcostap.engine.utils.actions.ActionsUpdater
 import com.dcostap.engine.utils.input.InputController
-import com.dcostap.engine.utils.input.InputListener
 import com.dcostap.engine.utils.use
 import com.dcostap.Engine
 import com.dcostap.engine.utils.ui.ExtTable
@@ -22,7 +21,7 @@ import ktx.collections.GdxArray
  *
  * Extend this class instead of ScreenAdapter if you need all that functionality
  */
-abstract class BaseScreen(val engine : Engine) : Screen, Drawable, Updatable, InputListener {
+abstract class BaseScreen(val engine : Engine) : Screen, Drawable, Updatable {
     var camera: OrthographicCamera = OrthographicCamera()
         private set
 
@@ -48,8 +47,6 @@ abstract class BaseScreen(val engine : Engine) : Screen, Drawable, Updatable, In
         inputMulti = InputMultiplexer(Engine.debugUI.stage, inputController)
 
         Gdx.input.inputProcessor = inputMulti
-
-        inputController.registerListener(this)
     }
 
     override fun hide() {
@@ -139,16 +136,7 @@ abstract class BaseScreen(val engine : Engine) : Screen, Drawable, Updatable, In
     override fun resume() {}
 
     override fun dispose() {
-        inputController.removeListener(this)
         Engine.debugUI.stage.clear()
-    }
-
-    override fun touchDownEvent(screenX: Float, screenY: Float, worldX: Float, worldY: Float, pointer: Int, isJustPressed: Boolean) {
-
-    }
-
-    override fun touchReleasedEvent(screenX: Float, screenY: Float, worldX: Float, worldY: Float, button: Int, pointer: Int) {
-
     }
 }
 

@@ -63,12 +63,28 @@ import ktx.collections.*
  */
 open class Entity @JvmOverloads constructor(val position: Vector2 = Vector2(), boundingBox: Rectangle = Rectangle(),
                                                 var isSolid: Boolean = false, var isStatic: Boolean = false,
-                                                providesCollidingInfo: Boolean = Engine.ENTITIES_PROVIDE_COLL_INFO_DEFAULT)
+                                                providesCollidingInfo: Boolean = Engine.ENTITIES_PROVIDE_COLL_INFO_DEFAULT,
+                                                providesCullingInfo: Boolean = true,
+                                                providesStaticInfoToCells: Boolean = true)
     : Updatable, DrawableSortable
 {
     var providesCollidingInfo = providesCollidingInfo
         set(value) {
-            if (isAddedToMap) throw RuntimeException("Once added to the map the enabler / disabler of colliding info can't be changed")
+            if (isAddedToMap) throw RuntimeException("providesCollidingInfo value can't be changed once added to a map!")
+            field = value
+        }
+
+    /** if false entity will always be drawn even if outside the camera rectangle. Change it only before adding to a map */
+    var providesCullingInfo: Boolean = providesCullingInfo
+        set(value) {
+            if (isAddedToMap) throw RuntimeException("providesCullingInfo value can't be changed once added to a map!")
+            field = value
+        }
+
+    /** if true, static entities will modify colliding mapCells when added / removed to the map */
+    var providesStaticInfoToCells: Boolean = providesStaticInfoToCells
+        set(value) {
+            if (isAddedToMap) throw RuntimeException("providesCullingInfo value can't be changed once added to a map!")
             field = value
         }
 
@@ -106,9 +122,6 @@ open class Entity @JvmOverloads constructor(val position: Vector2 = Vector2(), b
     var isKilled = false
         private set
 
-    /** if true entity will always be drawn even if outside the camera rectangle */
-    var noCulling: Boolean = false
-
     /** Should never be called directly, instead use [EntityTiledMap.removeEntity]. A killed Entity can never be added to a map again. */
     open fun kill() {
         debugTable.remove()
@@ -120,7 +133,7 @@ open class Entity @JvmOverloads constructor(val position: Vector2 = Vector2(), b
     /** Use [updateCollidingState] to update the Array */
     val possibleCollidingEntities = Array<Entity>()
 
-    val debugEntityFlashingThing = FlashingThing()
+    val debugFlashingRect = FlashingRect()
 
     var boundingBoxes: ObjectMap<String, BoundingBox>
         protected set
@@ -215,24 +228,6 @@ open class Entity @JvmOverloads constructor(val position: Vector2 = Vector2(), b
         contents.row()
     }
 
-    /** This table only appears when the mouse hovers over the default bounding box */
-    open fun createDebugPopUpTable(contents: Table) {
-        contents.align(Align.top)
-        contents.top()
-        contents.background = Utils.solidColorDrawable(0f, 0f, 0f, 0.53f)
-        contents.pad(4f)
-
-        contents.add(ExtTable().also {
-            it.top()
-            it.add(ExtLabel(this.javaClass.simpleName))
-            it.row()
-            it.add(ExtLabel(textUpdateDelay = 0.15f) {
-                "x: ${Utils.formatNumber(x, 3)}; y: " + Utils.formatNumber(y, 3) + "; depth: $depth"
-            })
-        })
-        contents.row()
-    }
-
     /**
      * If relative and using delta, will move "units specified" /s. To instantly move the quantity specified pass a
      * delta value of 1
@@ -291,6 +286,7 @@ open class Entity @JvmOverloads constructor(val position: Vector2 = Vector2(), b
         if (debugTableTempInvisible && !Engine.DEBUG_UI_ENTITY_INFO_ABOVE) debugTableTempInvisible = false
 
         debugTable.isVisible = debugInfoIsVisible()
+        debugTableMouseOver = false
 
         if (debugTable.ancestorsVisible()) {
             map.ifNotNull {
@@ -305,13 +301,12 @@ open class Entity @JvmOverloads constructor(val position: Vector2 = Vector2(), b
     }
 
     override fun draw(gameDrawer: GameDrawer, delta: Float) {
-        if (Engine.DEBUG && Engine.DEBUG_ENTITIES_BB)
-            drawDebug(gameDrawer, delta)
+        if (!Engine.DEBUG_ENTITIES_BB_X_RAY) drawDebug(gameDrawer, delta)
     }
 
     private val debugRect = Rectangle()
 
-    private fun drawDebug(gameDrawer: GameDrawer, delta: Float) {
+    fun drawDebug(gameDrawer: GameDrawer, delta: Float) {
         if (Engine.DEBUG_UI_HIDE_STATIC_ENTITY_INFO && isStatic) return
 
         gameDrawer.alpha = Engine.DEBUG_TRANSPARENCY
@@ -333,14 +328,14 @@ open class Entity @JvmOverloads constructor(val position: Vector2 = Vector2(), b
         gameDrawer.resetAlpha()
         gameDrawer.resetColor()
 
-        debugEntityFlashingThing.update(delta)
+        debugFlashingRect.update()
 
-        if (debugEntityFlashingThing.isFlashing) {
-            debugEntityFlashingThing.setupGameDrawer(gameDrawer)
+        if (debugFlashingRect.isFlashing) {
+            debugFlashingRect.setupGameDrawer(gameDrawer)
 
             gameDrawer.drawRectangle(boundingBox, 0f, true)
 
-            debugEntityFlashingThing.resetGameDrawer(gameDrawer)
+            debugFlashingRect.resetGameDrawer(gameDrawer)
         }
     }
 
@@ -494,13 +489,12 @@ open class Entity @JvmOverloads constructor(val position: Vector2 = Vector2(), b
     /** Useful function for correctly handling touch input in a [EntityTiledMap]
      * @see [DrawableSortable.handleTouchInput] */
     override fun handleTouchInput(inputController: InputController, stageInputController: InputController?): Boolean {
-        debugTableMouseOver = false
         if (Engine.DEBUG_UI && showDebugTable && Engine.DEBUG_UI_ENTITY_INFO_POPUP) {
             pool(Rectangle::class.java) {
                 it.set(boundingBox)
                 if (it.width <= 0.2) it.width = 0.2f
                 if (it.height <= 0.2) it.height = 0.2f
-                if (boundingBox.contains(inputController.mousePos.world.x, inputController.mousePos.world.y)) {
+                if (it.contains(inputController.mousePos.world.x, inputController.mousePos.world.y)) {
                     debugTableMouseOver = true
                 }
             }
@@ -509,10 +503,11 @@ open class Entity @JvmOverloads constructor(val position: Vector2 = Vector2(), b
         return false
     }
 
+    private val jsonlibgdx = Json()
+
     /** todo: Saving Actions in [ActionsUpdater] */
     open fun saveEntity(onlySaveProperties: Boolean = false): JsonValue {
         val json = JsonSavedObject()
-        val jsonlibgdx = Json()
 
         if (!onlySaveProperties) {
             json.addChildValue("class", this.javaClass.name)
@@ -527,7 +522,6 @@ open class Entity @JvmOverloads constructor(val position: Vector2 = Vector2(), b
             json.addChildValue("isSolid", isSolid)
             json.addChildValue("depth", depth)
 
-//        json.addChildValue("actions", gson.toJson(actions))
             if (tiledEditorGroupNames != null) {
                 json.addChildValue("tiledEditorGroupNames", jsonlibgdx.toJson(tiledEditorGroupNames!!.toArray()))
             }
@@ -543,8 +537,6 @@ open class Entity @JvmOverloads constructor(val position: Vector2 = Vector2(), b
     }
 
     open fun loadEntity(jsonSavedObject: JsonValue, saveVersion: String) {
-        val jsonlibgdx = Json()
-
         boundingBoxes.clear()
 
         for (bb in jsonSavedObject.get("bbs")) {
@@ -558,8 +550,6 @@ open class Entity @JvmOverloads constructor(val position: Vector2 = Vector2(), b
         isSolid = jsonSavedObject.getBoolean("isSolid")
         isKilled = jsonSavedObject.getBoolean("isKilled")
         depth = jsonSavedObject.getInt("depth")
-
-//        actions = gson.fromJson(jsonSavedObject.getString("actions"), ActionsUpdater::class.java)
 
         if (jsonSavedObject.has("tiledEditorGroupNames")) {
             tiledEditorGroupNames = Array(jsonlibgdx.fromJson(kotlin.Array<String>::class.java,

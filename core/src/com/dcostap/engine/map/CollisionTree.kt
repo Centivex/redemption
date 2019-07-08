@@ -5,12 +5,12 @@ import com.badlogic.gdx.math.GridPoint2
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.utils.ObjectMap
 import com.badlogic.gdx.utils.Pool
 import com.dcostap.Engine
 import com.dcostap.engine.map.entities.BoundingBox
 import com.dcostap.engine.map.entities.Entity
 import com.dcostap.engine.utils.GameDrawer
+import com.dcostap.printDebug
 import ktx.collections.GdxArray
 
 /**
@@ -238,7 +238,7 @@ class CollisionTree(val cellSize: Int, mapSizeX: Int, mapSizeY: Int, private val
 
                 // try to ignore camera checks for debug purposes
                 if (Engine.DEBUG_COLLISION_TREE_UPDATES && rectangle.area() < 12) {
-                    bb.entity.debugEntityFlashingThing.flashColor(Color.RED, 0.3f)
+                    bb.entity.debugFlashingRect.flashColor(Color.RED, 0.3f)
                 }
             }
         }
@@ -334,6 +334,10 @@ class CollisionTree(val cellSize: Int, mapSizeX: Int, mapSizeY: Int, private val
     private fun getTreeCellsOverlappedByRectangle(rectangle: Rectangle): GdxArray<CollisionTreeCell> {
         val returnedCells = dummyTreeCellSet
         returnedCells.clear()
+
+        if (rectangle.width < 0 || rectangle.height < 0)
+            printDebug("Collision checking with a Rectangle with negative height or width. This will yield wrong results.\n" +
+                    "Use Rectangle's extension function 'fixNegatives()'")
 
         rectangleOrigin.set(rectangle.x.toInt(), rectangle.y.toInt())
         rectangleEnd.set(((rectangle.x + rectangle.width).toInt()), ((rectangle.y + rectangle.height).toInt()))

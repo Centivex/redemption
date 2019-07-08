@@ -11,8 +11,10 @@ import com.dcostap.engine.map.Tile
 import com.dcostap.engine.map.entities.Entity
 import com.dcostap.engine.utils.Utils
 import com.dcostap.engine.utils.ifNotNull
+import com.dcostap.engine.utils.pixelsToUnits
+import com.dcostap.engine.utils.unitsToPixels
 import com.dcostap.printDebug
-import ktx.collections.GdxArray
+import ktx.collections.*
 import java.io.File
 
 
@@ -52,6 +54,8 @@ import java.io.File
  * 0 or more groups. The map may have a custom boolean property with name "group:name", which may disable that group
  * if the boolean is false. Layers belonging to at least 1 disabled group will be ignored.
  *
+ * You can specify the ignored layers from code via [ignoredLayerGroups]. This will be checked before Tiled properties.
+ *
  * Special custom properties:
  * - depth: can be in an ObjectLayer, TileLayer, and an Object. Will modify the render order of tiles and entities
  * Object's depth property will overwrite the ObjectLayer's depth property if both exist.
@@ -74,9 +78,15 @@ class JsonMapLoader(mapName: String, mapFolder: String, objectTemplatesJsonFolde
     private var tileLoaderFromString: TileLoaderFromString? = null
     private var savedMapInfoJson: JsonValue? = null
 
+    val ignoredLayerGroups = GdxSet<String>()
+
+    val loadingOffset = GridPoint2(0, 0)
+
     /** @param savedMapInfoJson Pass a JsonValue from saving the map so that properties of entities and the map itself can be loaded */
     fun loadMap(map: EntityTiledMap, entityLoaderFromString: EntityLoaderFromString? = null,
-                tileLoaderFromString: TileLoaderFromString? = null, savedMapInfoJson: JsonValue? = null, collisionTreeCellSize: Int = 10) {
+                tileLoaderFromString: TileLoaderFromString? = null, savedMapInfoJson: JsonValue? = null,
+                collisionTreeCellSize: Int = EntityTiledMap.defaultCollTreeCellSize) {
+        this.layerDepth = layerDepthStarting
         this.savedMapInfoJson = savedMapInfoJson
         this.entityLoaderFromString = entityLoaderFromString
         this.tileLoaderFromString = tileLoaderFromString
@@ -88,6 +98,26 @@ class JsonMapLoader(mapName: String, mapFolder: String, objectTemplatesJsonFolde
 
         if (savedMapInfoJson == null || !loadMapProps(map)) {
             map.customProperties = getCustomPropertiesFromMapJson()
+        }
+
+        loadLayers(mapInfo.jsonMapFile, map)
+
+        this.savedMapInfoJson = null
+
+        map.removeAndAddEntities()
+    }
+
+    fun appendToLoadedMap(map: EntityTiledMap, originX: Int, originY: Int, entityLoaderFromString: EntityLoaderFromString? = null,
+                tileLoaderFromString: TileLoaderFromString? = null, savedMapInfoJson: JsonValue? = null) {
+        this.layerDepth = layerDepthStarting
+        this.savedMapInfoJson = savedMapInfoJson
+        this.entityLoaderFromString = entityLoaderFromString
+        this.tileLoaderFromString = tileLoaderFromString
+
+        loadingOffset.set(originX, originY)
+
+        if (savedMapInfoJson == null || !loadMapProps(map)) {
+            map.customProperties.add(getCustomPropertiesFromMapJson())
         }
 
         loadLayers(mapInfo.jsonMapFile, map)
@@ -159,7 +189,7 @@ class JsonMapLoader(mapName: String, mapFolder: String, objectTemplatesJsonFolde
     }
 
     /** default depth ordering of layers starts with this value*/
-    var layerDepthStarting = 10
+    var layerDepthStarting = 20
 
     private var layerDepth = layerDepthStarting
 
@@ -196,6 +226,7 @@ class JsonMapLoader(mapName: String, mapFolder: String, objectTemplatesJsonFolde
                 if (map == null || onlyPreload) return true
                 if (folders != null) {
                     fun isGroupEnabled(groupName: String): Boolean {
+                        if (ignoredLayerGroups.contains(groupName)) return false
                         for (entry in map.customProperties.booleans.entries()) {
                             if (!entry.value) {
                                 val group = getGroupFromName(entry.key)
@@ -220,7 +251,6 @@ class JsonMapLoader(mapName: String, mapFolder: String, objectTemplatesJsonFolde
             }
 
             while (thisLayer != null) {
-                layerDepth -= layerDepthDecrease
                 if (thisLayer.getBoolean("visible", true)) {
                     if (thisLayer.getString("type") == "tilelayer") {
                         if (isLayerAllowed())
@@ -240,6 +270,7 @@ class JsonMapLoader(mapName: String, mapFolder: String, objectTemplatesJsonFolde
                     }
                 }
                 thisLayer = thisLayer.next()
+                layerDepth -= layerDepthDecrease
             }
         }
 
@@ -250,9 +281,10 @@ class JsonMapLoader(mapName: String, mapFolder: String, objectTemplatesJsonFolde
      * Loops through all cells inside the tile layer.
      */
     private fun loadTileLayer(jsonMapFile: JsonValue, jsonLayerInfo: JsonValue, map: EntityTiledMap?,
-                              onlyPreload: Boolean = false, groupNames: GdxArray<String>? = null, parentOffsetX: Float = 0f, parentOffsetY: Float = 0f) {
-        val width = if (map == null) 0 else map.width
-        val height = if (map == null) 0 else map.height
+                              onlyPreload: Boolean = false, groupNames: GdxArray<String>? = null,
+                              parentOffsetX: Float = 0f, parentOffsetY: Float = 0f) {
+        val width = jsonMapFile.get("width").asInt()
+        val height = jsonMapFile.get("height").asInt()
 
         val cellPosition = GridPoint2()
 
@@ -274,6 +306,7 @@ class JsonMapLoader(mapName: String, mapFolder: String, objectTemplatesJsonFolde
 
             if (!onlyPreload && map != null) {
                 cellPosition.set(i % width, height - i / width - 1)
+                cellPosition.add(loadingOffset)
 
                 val mapTileSize = Math.max(jsonMapFile.getInt("tileheight"), jsonMapFile.getInt("tilewidth"))
                 // apply the offset
@@ -316,7 +349,7 @@ class JsonMapLoader(mapName: String, mapFolder: String, objectTemplatesJsonFolde
             val position = Vector2(objectInfo.getInt("x").toFloat(), objectInfo.getInt("y").toFloat())
 
             // apply the offset
-            position.x += jsonLayerInfo.getInt("offsetx", 0) + parentOffsetX
+            position.x += jsonLayerInfo.getInt("offsetx", 0) + parentOffsetX + loadingOffset.x.unitsToPixels
             position.y += jsonLayerInfo.getInt("offsety", 0) + parentOffsetY
 
             // Tiled saves object's coords as pixel units with origin on top-left, so translate it to game coords
@@ -326,7 +359,8 @@ class JsonMapLoader(mapName: String, mapFolder: String, objectTemplatesJsonFolde
 
             position.x /= mapTileSize
             position.y /= mapTileSize
-            position.y = if (map == null) 0f else map.height - position.y
+            position.y = jsonMapFile.get("height").asInt() - position.y
+            position.y += loadingOffset.y
 
             val isTileObject: Boolean
 
@@ -414,7 +448,8 @@ class JsonMapLoader(mapName: String, mapFolder: String, objectTemplatesJsonFolde
 
         val tileImageName = getTileImageNameFromGIDInsideTileSet(GID, jsonMapFile, templateInfoRootJson)
         val objectName = objectInfo.getString("name")
-        val entity = entityLoaderFromString!!.loadEntityFromTiledTileObject(tileImageName, objectName, position, widthPixels, heightPixels, map, objectProps)
+        val entity = entityLoaderFromString!!.loadEntityFromTiledTileObject(tileImageName, objectName, position,
+                widthPixels, heightPixels, layerDepth, map, objectProps)
         entity.ifNotNull { map.addEntity(it) }
         return entity
     }
@@ -426,7 +461,8 @@ class JsonMapLoader(mapName: String, mapFolder: String, objectTemplatesJsonFolde
     private fun loadObject(map: EntityTiledMap, position: Vector2, widthPixels: Int, heightPixels: Int,
                            objectInfo: JsonValue, objectProps: CustomProperties): Entity? {
         val objectName = objectInfo.getString("name")
-        val entity = entityLoaderFromString!!.loadEntityFromObjectName(objectName, position, widthPixels, heightPixels, map, objectProps)
+        val entity = entityLoaderFromString!!.loadEntityFromObjectName(objectName, position, widthPixels, heightPixels,
+                layerDepth, map, objectProps)
         entity.ifNotNull { map.addEntity(it) }
         return entity
     }

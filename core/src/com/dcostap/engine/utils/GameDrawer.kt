@@ -103,30 +103,28 @@ class GameDrawer(val batch: Batch) {
         drawingOffset.set(0f, 0f)
     }
 
-    val defaultScaleX = 1f
-    val defaultScaleY = 1f
-
-    val defaultRotation = 0f
-
     /** Local scaleX, used when no scaleX is specified on the draw methods */
-    var scaleX = defaultScaleX
+    var scaleX = 1f
 
     /** Local scaleY, used when no scaleY is specified on the draw methods */
-    var scaleY = defaultScaleY
+    var scaleY = 1f
 
     fun setScaleXY(value: Float) {
         scaleX = value
         scaleY = value
     }
 
+    var originX = 0f
+    var originY = 0f
+
     /** Local rotation, used when no rotation is specified on the draw methods */
-    var rotation = defaultRotation
+    var rotation = 0f
 
     /** Resets local scale and rotation to the default values */
     fun resetModifiers() {
-        scaleX = defaultScaleX
-        scaleY = defaultScaleY
-        rotation = defaultRotation
+        scaleX = 1f; scaleY = 1f
+        rotation = 0f
+        originX = 0f; originY = 0f
     }
 
     fun reset() {
@@ -176,14 +174,15 @@ class GameDrawer(val batch: Batch) {
      */
     @JvmOverloads fun draw(textureRegion: TextureRegion, x: Float, y: Float, scaleX: Float = this.scaleX, scaleY: Float = this.scaleY,
              rotation: Float = this.rotation,
-             originX: Float = 0f, originY: Float = 0f,
+             originX: Float = this.originX, originY: Float = this.originY,
              flipX: Boolean = false, flipY: Boolean = false, displaceX: Int = 0, displaceY: Int = 0,
+             customWidth: Float = -1f, customHeight: Float = -1f,
              centerOnXAxis: Boolean = false, centerOnYAxis: Boolean = false,
              centerOriginOnXAxis: Boolean = false, centerOriginOnYAxis: Boolean = false)
     {
         textureRegion.flip(flipX, flipY)
-        val width = getUnitWidth(textureRegion)
-        val height = getUnitHeight(textureRegion)
+        val width = if (customWidth != -1f) customWidth else getUnitWidth(textureRegion)
+        val height = if (customHeight != -1f) customHeight else getUnitHeight(textureRegion)
 
         val previousOffset = dummyVector2
         previousOffset.set(drawingOffset)
@@ -208,44 +207,45 @@ class GameDrawer(val batch: Batch) {
         textureRegion.flip(flipX, flipY)
     }
 
+    @JvmOverloads fun draw(textureRegion: TextureRegion, position: Vector2, scaleX: Float = this.scaleX, scaleY: Float = this.scaleY,
+                           rotation: Float = this.rotation,
+                           originX: Float = this.originX, originY: Float = this.originY,
+                           flipX: Boolean = false, flipY: Boolean = false, displaceX: Int = 0, displaceY: Int = 0,
+                           customWidth: Float = -1f, customHeight: Float = -1f,
+                           centerOnXAxis: Boolean = false, centerOnYAxis: Boolean = false,
+                           centerOriginOnXAxis: Boolean = false, centerOriginOnYAxis: Boolean = false)
+    {
+        this.draw(textureRegion, position.x, position.y, scaleX, scaleY, rotation, originX, originY, flipX, flipY,
+                displaceX, displaceY, customWidth, customHeight, centerOnXAxis, centerOnYAxis, centerOriginOnXAxis, centerOriginOnYAxis)
+    }
+
     @JvmOverloads fun drawCentered(textureRegion: TextureRegion, x: Float, y: Float, scaleX: Float = this.scaleX, scaleY: Float = this.scaleY,
                      rotation: Float = this.rotation,
-                     originX: Float = 0f, originY: Float = 0f,
+                     originX: Float = this.originX, originY: Float = this.originY,
                      flipX: Boolean = false, flipY: Boolean = false, displaceX: Int = 0, displaceY: Int = 0,
+                     customWidth: Float = -1f, customHeight: Float = -1f,
                      centerOnXAxis: Boolean = true, centerOnYAxis: Boolean = true) {
-        this.draw(textureRegion, x, y, scaleX, scaleY, rotation, originX, originY, flipX, flipY, displaceX, displaceY,
+        this.draw(textureRegion, x, y, scaleX, scaleY, rotation, originX, originY, flipX, flipY, displaceX, displaceY, customWidth, customHeight,
                 centerOnXAxis, centerOnYAxis)
     }
 
     @JvmOverloads fun drawWithOriginOnCenter(textureRegion: TextureRegion, x: Float, y: Float, scaleX: Float = this.scaleX, scaleY: Float = this.scaleY,
-                               rotation: Float = this.rotation,
-                               originX: Float = 0f, originY: Float = 0f,
+                               rotation: Float = this.rotation, originX: Float = this.originX, originY: Float = this.originY,
                                flipX: Boolean = false, flipY: Boolean = false, displaceX: Int = 0, displaceY: Int = 0,
+                               customWidth: Float = -1f, customHeight: Float = -1f,
                                centerOriginOnXAxis: Boolean = true, centerOriginOnYAxis: Boolean = true) {
-        this.draw(textureRegion, x, y, scaleX, scaleY, rotation, originX, originY, flipX, flipY, displaceX, displaceY,
+        this.draw(textureRegion, x, y, scaleX, scaleY, rotation, originX, originY, flipX, flipY, displaceX, displaceY, customWidth, customHeight,
                 centerOriginOnXAxis = centerOriginOnXAxis, centerOriginOnYAxis = centerOriginOnYAxis)
     }
 
     @JvmOverloads fun drawCenteredWithOriginOnCenter(textureRegion: TextureRegion, x: Float, y: Float, scaleX: Float = this.scaleX, scaleY: Float = this.scaleY,
-                                       rotation: Float = this.rotation,
-                                       originX: Float = 0f, originY: Float = 0f,
+                                       rotation: Float = this.rotation, originX: Float = this.originX, originY: Float = this.originY,
                                        flipX: Boolean = false, flipY: Boolean = false, displaceX: Int = 0, displaceY: Int = 0,
+                                       customWidth: Float = -1f, customHeight: Float = -1f,
                                        centerOnXAxis: Boolean = true, centerOnYAxis: Boolean = true,
                                        centerOriginOnXAxis: Boolean = true, centerOriginOnYAxis: Boolean = true) {
-        this.draw(textureRegion, x, y, scaleX, scaleY, rotation, originX, originY, flipX, flipY, displaceX, displaceY,
+        this.draw(textureRegion, x, y, scaleX, scaleY, rotation, originX, originY, flipX, flipY, displaceX, displaceY, customWidth, customHeight,
                 centerOnXAxis, centerOnYAxis, centerOriginOnXAxis, centerOriginOnYAxis)
-    }
-
-    /** With custom size */
-    @JvmOverloads fun drawSized(textureRegion: TextureRegion, x: Float, y: Float, width: Float, height: Float,
-                  scaleX: Float = this.scaleX, scaleY: Float = this.scaleY,
-                  rotation: Float = this.rotation, originX: Float = 0f, originY: Float = 0f)
-    {
-        val thisX = getFinalDrawingX(x)
-        val thisY = getFinalDrawingY(y)
-
-        batch.draw(textureRegion, thisX, thisY, originX, originY,
-                width, height, scaleX, scaleY, rotation)
     }
 
     /**
@@ -299,8 +299,8 @@ class GameDrawer(val batch: Batch) {
      * @param fill      whether the rectangle drawn will be filled with the color
      */
     @JvmOverloads fun drawRectangle(x: Float, y: Float, width: Float, height: Float, fill: Boolean, thickness: Float = 0.13f,
-                      originX: Float = 0f, originY: Float = 0f, scaleX: Float = this.scaleX, scaleY: Float = this.scaleY,
-                      rotation: Float = this.rotation) {
+                                    originX: Float = this.originX, originY: Float = this.originY,
+                                    scaleX: Float = this.scaleX, scaleY: Float = this.scaleY, rotation: Float = this.rotation) {
         val thisX = getFinalDrawingX(x)
         val thisY = getFinalDrawingY(y)
 
